@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NotificationRecipient extends Model
 {
-    protected $table = 'lrc_notification_recipients';
+    protected $table = 'lrc_recipients';
     protected $fillable = ['user_id'];
 
     public function user(): BelongsTo

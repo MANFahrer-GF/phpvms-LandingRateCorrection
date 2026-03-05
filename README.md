@@ -353,8 +353,8 @@ modules/LandingRateCorrection/
 If you want to permanently delete all correction data, run this in phpMyAdmin:
 
 ```sql
-DROP TABLE IF EXISTS `landing_rate_corrections`;
-DROP TABLE IF EXISTS `lrc_notification_recipients`;
+DROP TABLE IF EXISTS `lrc_corrections`;
+DROP TABLE IF EXISTS `lrc_recipients`;
 
 DELETE FROM `migrations`
 WHERE `migration` IN (

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LandingRateCorrection extends Model
 {
-    protected $table = 'landing_rate_corrections';
+    protected $table = 'lrc_corrections';
 
     protected $fillable = [
         'pirep_id', 'pilot_id', 'admin_id',
