@@ -1,6 +1,6 @@
 {{-- LandingRateCorrection :: pilot/index.blade.php --}}
 @extends('app')
-@section('title', 'Landeratenkorrekturen')
+@section('title', app()->getLocale()==='de' ? 'Landeratenkorrekturen' : 'Landing Rate Corrections')
 
 @php
 $lang = str_starts_with(app()->getLocale(), 'en') ? 'en' : 'de';

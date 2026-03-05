@@ -3,6 +3,7 @@
 namespace Modules\LandingRateCorrection\Http\Controllers;
 
 use App\Models\Pirep;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -157,12 +158,12 @@ class PilotController extends Controller
             'status'                 => 'pending',
         ]);
 
-        // Send admin notifications
+        // Send admin notifications – single call to avoid multiple SMTP connections
         try {
-            $emails = NotificationRecipient::getRecipientEmails();
-            foreach ($emails as $email) {
-                Notification::route('mail', $email)
-                    ->notify(new CorrectionSubmittedNotification($correction));
+            $recipientIds = NotificationRecipient::pluck('user_id');
+            if ($recipientIds->isNotEmpty()) {
+                $admins = User::whereIn('id', $recipientIds)->get();
+                Notification::send($admins, new CorrectionSubmittedNotification($correction));
             }
         } catch (\Exception $e) {
             Log::warning('[LRC] Notification failed: ' . $e->getMessage());
