@@ -38,8 +38,10 @@ Route::prefix('admin/lrc')->name('lrc.admin.')->middleware(['auth', 'role:admin'
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->get('/lrc/evidence/{filename}', function (string $filename) {
-    // Prevent path traversal
+    // Prevent path traversal and header injection
     $filename = basename($filename);
+    // Strip characters that could break Content-Disposition header
+    $safeFilename = preg_replace('/[^\w.\-]/', '_', $filename);
     $disk     = Storage::disk('public');
     $path     = 'lrc_evidence/' . $filename;
 
@@ -49,7 +51,7 @@ Route::middleware('auth')->get('/lrc/evidence/{filename}', function (string $fil
         $mimeType = mime_content_type($fullPath) ?: 'application/octet-stream';
         return response()->file($fullPath, [
             'Content-Type'        => $mimeType,
-            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            'Content-Disposition' => 'inline; filename="' . $safeFilename . '"',
         ]);
     }
 

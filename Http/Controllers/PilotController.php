@@ -54,6 +54,7 @@ class PilotController extends Controller
         $auditLog = LandingRateCorrection::where('pilot_id', Auth::id())
             ->with(['pirep.airline', 'admin'])
             ->orderByDesc('created_at')
+            ->limit(100)
             ->get();
 
         return view('landingratecorecorrection::pilot.index',
@@ -129,7 +130,8 @@ class PilotController extends Controller
                 }
 
                 $evidencePath         = $file->store('lrc_evidence', 'public');
-                $evidenceOriginalName = $file->getClientOriginalName();
+                // Sanitize original filename before storing (strip control chars)
+                $evidenceOriginalName = preg_replace('/[^\w.\-\s]/', '_', $file->getClientOriginalName());
 
                 Log::info('[LRC] Upload OK: ' . $evidencePath);
 

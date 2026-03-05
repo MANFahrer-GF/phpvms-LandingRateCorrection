@@ -94,9 +94,14 @@ class AdminController extends Controller
 
     public function saveRecipients(Request $request)
     {
-        $ids = array_filter(array_map('intval', $request->input('recipients', [])));
+        $rawIds    = array_filter(array_map('intval', $request->input('recipients', [])));
+        // Only accept IDs that are actually admin users – prevents inserting arbitrary user IDs
+        $adminIds  = User::whereHas('roles', fn($q) => $q->where('name', 'admin'))
+                         ->whereIn('id', $rawIds)
+                         ->pluck('id')
+                         ->toArray();
         NotificationRecipient::truncate();
-        foreach ($ids as $userId) {
+        foreach ($adminIds as $userId) {
             NotificationRecipient::create(['user_id' => $userId]);
         }
         return back()->with('success', 'Notification recipients saved.');
@@ -155,7 +160,8 @@ class AdminController extends Controller
     public function approve(Request $request, int $correctionId)
     {
         $correction = LandingRateCorrection::with(['pirep', 'pilot'])->findOrFail($correctionId);
-        if (!$correction->isPending()) return back()->with('error', 'Already processed.');
+        // Re-check status inside transaction to prevent race condition
+        if (!$correction->fresh()->isPending()) return back()->with('error', 'Already processed.');
 
         $validated = $request->validate(['admin_note' => ['nullable', 'string', 'max:1000']]);
 
@@ -185,7 +191,7 @@ class AdminController extends Controller
     public function reject(Request $request, int $correctionId)
     {
         $correction = LandingRateCorrection::with(['pirep', 'pilot'])->findOrFail($correctionId);
-        if (!$correction->isPending()) return back()->with('error', 'Already processed.');
+        if (!$correction->fresh()->isPending()) return back()->with('error', 'Already processed.');
 
         $validated = $request->validate([
             'admin_note' => ['required', 'string', 'min:3', 'max:1000'],

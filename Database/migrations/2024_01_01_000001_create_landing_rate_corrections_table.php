@@ -28,6 +28,7 @@ return new class extends Migration {
             $table->index('pirep_id');
             $table->index('pilot_id');
             $table->index('status');
+            $table->index(['pilot_id', 'status']); // composite for pilot dashboard queries
         });
     }
 
