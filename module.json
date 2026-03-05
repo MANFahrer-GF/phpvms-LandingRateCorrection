@@ -1,0 +1,13 @@
+{
+    "name": "LandingRateCorrection",
+    "alias": "landingratecorecorrection",
+    "description": "Allows pilots to request corrections for landing rates on submitted PIREPs.",
+    "keywords": ["pirep", "landing", "correction"],
+    "version": "1.0.0",
+    "priority": 0,
+    "providers": [
+        "Modules\\LandingRateCorrection\\Providers\\LandingRateCorrectionServiceProvider"
+    ],
+    "aliases": {},
+    "files": []
+}

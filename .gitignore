@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# PHP / Laravel
+vendor/
+*.log
+.env
+
+# Uploads (never commit user evidence files)
+public/uploads/lrc_evidence/
+storage/app/public/lrc_evidence/
+
+# Build artifacts
+*.zip
