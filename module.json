@@ -7,7 +7,7 @@
         "landing",
         "correction"
     ],
-    "version": "1.1.0",
+    "version": "1.1.1",
     "priority": 0,
     "providers": [
         "Modules\\LandingRateCorrection\\Providers\\LandingRateCorrectionServiceProvider"

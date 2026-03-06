@@ -5,6 +5,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.1.1] — 2026-03-06
+
+### Fixed
+- `Undefined variable $lang` error on the Guide tab — replaced remaining `$lang` references with `app()->getLocale()` after the v1.2.0 lang file refactor
+- `ServiceProvider` did not load translations when the published lang path did not exist — module now always falls back to `Resources/lang/` automatically, no `php artisan vendor:publish` required
+
+### Added
+- Language files for 6 additional locales (UI labels fully translated, guide falls back to English):
+  - 🇪🇸 Spanish — `lang/es/lrc.php`
+  - 🇮🇹 Italian — `lang/it/lrc.php`
+  - 🇯🇵 Japanese — `lang/ja/lrc.php`
+  - 🇵🇹 Portuguese (European) — `lang/pt-pt/lrc.php`
+  - 🇧🇷 Portuguese (Brazilian) — `lang/pt-br/lrc.php`
+  - 🇹🇷 Turkish — `lang/tr/lrc.php`
+- **Mail Template Editor** — new admin tab ✏️ Mail Templates under Addons → LR Corrections
+  - Edit subject and body of all 3 email notifications directly in the admin panel — no file editing required
+  - Changes saved to `lrc_mail_settings` database table (migration 000005, runs via `/update`)
+  - Available placeholders: `{pilot_name}` `{flight}` `{route}` `{original_rate}` `{requested_rate}` `{reason}` `{admin_note}`
+  - Default templates are fully generic — no VA-specific branding
+
+---
+
 ## [1.1.0] — 2026-03-06
 
 ### Added

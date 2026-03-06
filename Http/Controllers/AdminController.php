@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Modules\LandingRateCorrection\Models\LandingRateCorrection;
 use Modules\LandingRateCorrection\Models\NotificationRecipient;
+use Modules\LandingRateCorrection\Models\MailSetting;
 use Modules\LandingRateCorrection\Notifications\CorrectionProcessedNotification;
 
 class AdminController extends Controller
@@ -42,6 +43,9 @@ class AdminController extends Controller
 
         } elseif ($tab === 'settings') {
             // $admins + $recipientIds already loaded above
+
+        } elseif ($tab === 'mail') {
+            // Mail templates loaded in view via MailSetting::get()
 
         } else {
             $statusFilter = in_array($tab, ['pending', 'approved', 'rejected']) ? $tab : null;
@@ -214,5 +218,23 @@ class AdminController extends Controller
         }
 
         return redirect()->route('lrc.admin.index')->with('success', 'Correction rejected.');
+    }
+
+    public function saveMailTemplates(Request $request)
+    {
+        $validated = $request->validate([
+            'submitted_subject'          => ['required', 'string', 'max:200'],
+            'submitted_body'             => ['required', 'string', 'max:2000'],
+            'processed_approved_subject' => ['required', 'string', 'max:200'],
+            'processed_approved_body'    => ['required', 'string', 'max:2000'],
+            'processed_rejected_subject' => ['required', 'string', 'max:200'],
+            'processed_rejected_body'    => ['required', 'string', 'max:2000'],
+        ]);
+
+        foreach ($validated as $key => $value) {
+            MailSetting::set($key, $value);
+        }
+
+        return back()->with('success', 'Mail templates saved successfully.');
     }
 }

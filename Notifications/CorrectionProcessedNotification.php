@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Modules\LandingRateCorrection\Models\LandingRateCorrection;
+use Modules\LandingRateCorrection\Models\MailSetting;
 
 class CorrectionProcessedNotification extends Notification
 {
@@ -17,32 +18,32 @@ class CorrectionProcessedNotification extends Notification
 
     public function toMail(mixed $notifiable): MailMessage
     {
-        $c     = $this->correction;
-        $pilot = $c->pilot;
-        $name  = $pilot ? ($pilot->name ?? 'Pilot') : 'Pilot';
-        $pirep = $c->pirep;
-        $route = $pirep ? "{$pirep->dpt_airport_id} → {$pirep->arr_airport_id}" : '–';
-        $fn    = $pirep ? (($pirep->airline?->icao ?? '') . $pirep->flight_number . ' · ' . $route) : $c->pirep_id;
-        $isOk  = $c->isApproved();
+        $c      = $this->correction;
+        $isOk   = $c->isApproved();
+        $pilot  = $c->pilot;
+        $pirep  = $c->pirep;
+        $route  = $pirep ? "{$pirep->dpt_airport_id} → {$pirep->arr_airport_id}" : '–';
+        $fn     = $pirep ? (($pirep->airline?->icao ?? '') . $pirep->flight_number) : $c->pirep_id;
 
-        $msg = (new MailMessage)
-            ->subject('[GSG] Your correction request has been ' . ($isOk ? 'approved ✅' : 'rejected ❌'))
-            ->greeting('Hello ' . $name . ',');
+        $vars = [
+            'pilot_name'     => $pilot?->name ?? 'Pilot',
+            'flight'         => $fn,
+            'route'          => $route,
+            'original_rate'  => $c->original_landing_rate,
+            'requested_rate' => $c->requested_landing_rate,
+            'admin_note'     => $c->admin_note ?? '',
+        ];
 
-        if ($isOk) {
-            $msg->line("Your correction request for flight **{$fn}** has been **approved**.")
-                ->line("The landing rate has been updated from **{$c->original_landing_rate} ft/min** to **{$c->requested_landing_rate} ft/min**.");
-        } else {
-            $msg->line("Your correction request for flight **{$fn}** has been **rejected**.")
-                ->line("Original landing rate: **{$c->original_landing_rate} ft/min**");
+        $subjectKey = $isOk ? 'processed_approved_subject' : 'processed_rejected_subject';
+        $bodyKey    = $isOk ? 'processed_approved_body'    : 'processed_rejected_body';
+
+        $subject = MailSetting::render(MailSetting::get($subjectKey), $vars);
+        $body    = MailSetting::render(MailSetting::get($bodyKey),    $vars);
+
+        $msg = (new MailMessage)->subject($subject)->greeting('');
+        foreach (explode("\n", $body) as $line) {
+            if (trim($line) !== '') $msg->line(trim($line));
         }
-
-        if ($c->admin_note) {
-            $msg->line("**Admin note:** {$c->admin_note}");
-        }
-
-        return $msg
-            ->line('If you have any questions, please contact an administrator.')
-            ->salutation('German Sky Group');
+        return $msg->salutation('');
     }
 }

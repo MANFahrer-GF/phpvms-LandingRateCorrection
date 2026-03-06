@@ -61,6 +61,9 @@ label { color: #222 !important; }
     <li class="{{ $tab==='settings' ? 'active' : '' }}">
         <a href="{{ route('lrc.admin.index', ['tab'=>'settings']) }}">✉ Notification Recipients</a>
     </li>
+    <li class="{{ $tab==='mail' ? 'active' : '' }}">
+        <a href="{{ route('lrc.admin.index', ['tab'=>'mail']) }}">✏️ Mail Templates</a>
+    </li>
 </ul>
 
 {{-- ═══ REQUESTS: pending / approved / rejected / all ═══ --}}
@@ -214,6 +217,100 @@ label { color: #222 !important; }
                 @endforeach
             </div>
             <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+
+@elseif($tab === 'mail')
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>✏️ Mail Templates</strong>
+    </div>
+    <div class="panel-body">
+
+        <p class="text-muted" style="margin-bottom:20px">
+            Customize the subject and body of both email notifications.
+            Available placeholders:
+            <code>{pilot_name}</code>
+            <code>{flight}</code>
+            <code>{route}</code>
+            <code>{original_rate}</code>
+            <code>{requested_rate}</code>
+            <code>{reason}</code>
+            <code>{admin_note}</code>
+        </p>
+
+        <form action="{{ route('lrc.admin.save_mail_templates') }}" method="POST">
+            @csrf
+
+            {{-- ── Mail 1: Submitted (to admins) ── --}}
+            <div class="panel panel-default" style="margin-bottom:24px">
+                <div class="panel-heading" style="background:#f0f4ff">
+                    <strong>📨 Mail 1 — New Request (sent to admins)</strong>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" name="submitted_subject" class="form-control"
+                               value="{{ \Modules\LandingRateCorrection\Models\MailSetting::get('submitted_subject') }}"
+                               maxlength="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Body</label>
+                        <textarea name="submitted_body" class="form-control" rows="7"
+                                  maxlength="2000" required
+                                  style="font-family:monospace;font-size:13px">{{ \Modules\LandingRateCorrection\Models\MailSetting::get('submitted_body') }}</textarea>
+                        <small class="text-muted">Use line breaks to separate paragraphs.</small>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ── Mail 2: Approved (to pilot) ── --}}
+            <div class="panel panel-default" style="margin-bottom:24px">
+                <div class="panel-heading" style="background:#f0fff4">
+                    <strong>✅ Mail 2 — Approved (sent to pilot)</strong>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" name="processed_approved_subject" class="form-control"
+                               value="{{ \Modules\LandingRateCorrection\Models\MailSetting::get('processed_approved_subject') }}"
+                               maxlength="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Body</label>
+                        <textarea name="processed_approved_body" class="form-control" rows="7"
+                                  maxlength="2000" required
+                                  style="font-family:monospace;font-size:13px">{{ \Modules\LandingRateCorrection\Models\MailSetting::get('processed_approved_body') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ── Mail 3: Rejected (to pilot) ── --}}
+            <div class="panel panel-default" style="margin-bottom:24px">
+                <div class="panel-heading" style="background:#fff4f0">
+                    <strong>❌ Mail 3 — Rejected (sent to pilot)</strong>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" name="processed_rejected_subject" class="form-control"
+                               value="{{ \Modules\LandingRateCorrection\Models\MailSetting::get('processed_rejected_subject') }}"
+                               maxlength="200" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Body</label>
+                        <textarea name="processed_rejected_body" class="form-control" rows="7"
+                                  maxlength="2000" required
+                                  style="font-family:monospace;font-size:13px">{{ \Modules\LandingRateCorrection\Models\MailSetting::get('processed_rejected_body') }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">💾 Save Templates</button>
+
         </form>
     </div>
 </div>

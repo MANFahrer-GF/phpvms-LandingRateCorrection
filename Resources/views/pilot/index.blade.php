@@ -1,46 +1,18 @@
 {{-- LandingRateCorrection :: pilot/index.blade.php --}}
 @extends('app')
-@section('title', app()->getLocale()==='de' ? 'Landeratenkorrekturen' : 'Landing Rate Corrections')
+@section('title', __('landingratecorecorrection::lrc.title'))
 
 @php
-$lang = str_starts_with(app()->getLocale(), 'en') ? 'en' : 'de';
-$t = [
-  'title'       => $lang==='en' ? 'Landing Rate Corrections'   : 'Landeratenkorrekturen',
-  'subtitle'    => $lang==='en' ? 'Request a correction for an incorrectly recorded landing rate.'
-                                : 'Beantrage die Korrektur einer falsch aufgezeichneten Landerate.',
-  'tab_flights' => $lang==='en' ? 'My Flights'    : 'Meine Flüge',
-  'tab_imp'     => $lang==='en' ? 'Implausible'   : 'Unplausibel',
-  'tab_audit'   => $lang==='en' ? 'My Requests'   : 'Meine Anträge',
-  'tab_guide'   => $lang==='en' ? 'Guide'          : 'Handbuch',
-  'date'        => $lang==='en' ? 'Date'           : 'Datum',
-  'flight'      => $lang==='en' ? 'Flight'         : 'Flugnr.',
-  'route'       => $lang==='en' ? 'Route'          : 'Route',
-  'aircraft'    => $lang==='en' ? 'Aircraft'       : 'Flugzeug',
-  'rate'        => $lang==='en' ? 'Landing Rate'   : 'Landerate',
-  'status'      => $lang==='en' ? 'Status'         : 'Status',
-  'details'     => $lang==='en' ? 'Details'        : 'Details',
-  'action'      => $lang==='en' ? 'Action'         : 'Aktion',
-  'original'    => $lang==='en' ? 'Original'       : 'Original',
-  'requested'   => $lang==='en' ? 'Requested'      : 'Beantragt',
-  'decision'    => $lang==='en' ? 'Admin Decision' : 'Admin-Entscheid',
-  'submitted'   => $lang==='en' ? 'Submitted'      : 'Eingereicht',
-  'btn_fix'     => $lang==='en' ? 'Request Fix'    : 'Korrigieren',
-  'btn_redo'    => $lang==='en' ? 'Re-apply'       : 'Neu beantragen',
-  'pending'     => $lang==='en' ? 'Pending'        : 'Ausstehend',
-  'approved'    => $lang==='en' ? 'Approved'       : 'Genehmigt',
-  'rejected'    => $lang==='en' ? 'Rejected'       : 'Abgelehnt',
-  'no_flights'  => $lang==='en' ? 'No completed flights found.'  : 'Keine abgeschlossenen Flüge.',
-  'no_imp'      => $lang==='en' ? 'No implausible flights!'      : 'Keine unplausiblen Flüge!',
-  'no_req'      => $lang==='en' ? 'No requests yet.'             : 'Noch keine Anträge.',
-  'imp_title'   => $lang==='en' ? 'Implausible Landing Rates'    : 'Unplausible Landeraten',
-  'imp_desc'    => $lang==='en' ? 'No value, positive, or shallower than -20 ft/min.'
-                                : 'Kein Wert, positiv oder flacher als -20 ft/min.',
-  'your_reason' => $lang==='en' ? 'Your Reason'   : 'Deine Begründung',
-  'admin_reply' => $lang==='en' ? 'Admin Response': 'Admin-Antwort',
-  'instead_of'  => $lang==='en' ? 'instead of'    : 'statt',
-  'awaiting'    => $lang==='en' ? 'Awaiting review…':'Wartet auf Prüfung…',
-  'no_val'      => $lang==='en' ? 'no value'       : 'kein Wert',
-];
+// UI translations — add new languages in Resources/lang/{locale}/lrc.php
+$t = [];
+foreach (['title','subtitle','tab_flights','tab_imp','tab_audit','tab_guide',
+          'date','flight','route','aircraft','rate','status','details','action',
+          'original','requested','decision','submitted','btn_fix','btn_redo',
+          'pending','approved','rejected','no_flights','no_imp','no_req',
+          'imp_title','imp_desc','your_reason','admin_reply','instead_of',
+          'awaiting','no_val'] as $k) {
+    $t[$k] = __('landingratecorecorrection::lrc.' . $k);
+}
 $impCount  = $implausiblePireps->count();
 $pendCount = $auditLog->where('status','pending')->count();
 @endphp
@@ -607,7 +579,7 @@ function lrcDet(id, btn) {
      - Pilots see: What is LRC, Landing rates, How to submit, Status, FAQ
      - Admins additionally see: Admin tabs, Review workflow, Direct Fix,
        Notifications, Frontend navigation links
-     Language: auto-detect via $lang variable (set in pilot/index)
+     Language: auto-detect via app()->getLocale()
      ═══════════════════════════════════════════════════════════════════ --}}
 
 <div class="lrc-panel" id="lrc-panel-guide">
@@ -681,7 +653,7 @@ function lrcDet(id, btn) {
 .gd-faq-a{font-size:.875rem;color:var(--ap-text);margin-bottom:1rem;line-height:1.75}
 </style>
 
-@if($lang==='en')
+@if(str_starts_with(app()->getLocale(), 'en'))
 {{-- ═══════════════════════ ENGLISH ═══════════════════════ --}}
 
 <div class="gd" style="padding:1.5rem 0">
@@ -912,6 +884,244 @@ function lrcDet(id, btn) {
         <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc/implausible') }}</span></td><td>All implausible PIREPs + Direct Fix</td></tr>
       </tbody>
     </table>
+  </div>
+
+</div>{{-- gd-admin-section --}}
+@endif {{-- isAdmin --}}
+
+</div>{{-- gd-body --}}
+</div>{{-- gd --}}
+
+@elseif(str_starts_with(app()->getLocale(), 'fr'))
+{{-- ═══════════════════════ FRANÇAIS ═══════════════════════ --}}
+
+<div class="gd" style="padding:1.5rem 0">
+<div class="gd-hero">
+  <h2>📋 Corrections de Taux d'Atterrissage – Guide</h2>
+  <p>Tout ce que vous devez savoir sur ce module · Section pilote visible par tous · Section admin visible uniquement aux admins</p>
+</div>
+
+{{-- CARD GRID --}}
+<div class="gd-grid">
+  <a href="#fr-what"   class="gd-c"><span class="gd-ci">❓</span><div class="gd-ct"><div class="t">C'est quoi ?</div><div class="s">Aperçu</div></div></a>
+  <a href="#fr-rates"  class="gd-c"><span class="gd-ci">📊</span><div class="gd-ct"><div class="t">Taux d'Atterrissage</div><div class="s">Tableau de référence</div></div></a>
+  <a href="#fr-submit" class="gd-c"><span class="gd-ci">✏️</span><div class="gd-ct"><div class="t">Soumettre</div><div class="s">Étape par étape</div></div></a>
+  <a href="#fr-status" class="gd-c"><span class="gd-ci">🔄</span><div class="gd-ct"><div class="t">Statut</div><div class="s">Que signifie chaque état</div></div></a>
+  <a href="#fr-faq"    class="gd-c"><span class="gd-ci">💬</span><div class="gd-ct"><div class="t">FAQ</div><div class="s">Questions fréquentes</div></div></a>
+  @if(auth()->user()->hasRole('admin'))
+  <a href="#fr-admintabs"   class="gd-c adm"><span class="gd-ci">🧭</span><div class="gd-ct"><div class="t">Onglets Admin <span class="gd-abadge">ADMIN</span></div><div class="s">Navigation expliquée</div></div></a>
+  <a href="#fr-review"      class="gd-c adm"><span class="gd-ci">🔍</span><div class="gd-ct"><div class="t">Révision <span class="gd-abadge">ADMIN</span></div><div class="s">Comment décider</div></div></a>
+  <a href="#fr-direct"      class="gd-c adm"><span class="gd-ci">⚡</span><div class="gd-ct"><div class="t">Correction directe <span class="gd-abadge">ADMIN</span></div><div class="s">Sans demande pilote</div></div></a>
+  <a href="#fr-notify"      class="gd-c adm"><span class="gd-ci">✉️</span><div class="gd-ct"><div class="t">Notifications <span class="gd-abadge">ADMIN</span></div><div class="s">Configuration email</div></div></a>
+  <a href="#fr-navlinks"    class="gd-c adm"><span class="gd-ci">🔗</span><div class="gd-ct"><div class="t">Liens Nav <span class="gd-abadge">ADMIN</span></div><div class="s">Intégration frontend</div></div></a>
+  @endif
+</div>
+
+<div class="gd-body">
+
+{{-- SECTION: WHAT --}}
+<div class="gd-sec" id="fr-what">
+  <h3>❓ Qu'est-ce qu'une Correction de Taux d'Atterrissage ?</h3>
+<div class="gd-sec-body">
+  <p>ACARS enregistre automatiquement votre taux d'atterrissage au moment du toucher des roues. Parfois, cette opération échoue – par exemple quand votre simulateur plante au moment précis de l'atterrissage, que votre connexion internet se coupe, ou qu'ACARS rencontre un bug logiciel. Le résultat est une valeur clairement erronée comme <strong>0 ft/min</strong> ou un chiffre extrême qui ne peut pas être réel.</p>
+  <p>Ce module vous permet de demander formellement une correction. Vous expliquez ce qui s'est passé, joignez éventuellement une capture d'écran comme preuve, et un admin décide. Si la demande est approuvée, votre PIREP est mis à jour automatiquement avec la valeur correcte.</p>
+  <div class="gd-note"><strong>Note :</strong> Seuls les PIREPs acceptés peuvent être corrigés. Les PIREPs en brouillon ou refusés ne sont pas éligibles.</div>
+</div>
+</div>
+
+<hr class="gd-hr">
+
+{{-- SECTION: RATES --}}
+<div class="gd-sec" id="fr-rates">
+  <h3>📊 Référence des Taux d'Atterrissage</h3>
+<div class="gd-sec-body">
+  <p>Utilisez ce tableau pour remplir votre demande de correction. Entrez la valeur qui correspond le mieux à ce que vous vous rappelez de votre vol :</p>
+  <div class="gd-rategrid">
+    <div class="gd-rb" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)">
+      <div style="font-weight:700;color:#4ade80;font-family:var(--ap-font-head);font-size:.88rem">✈ Doux</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-50 à -250 ft/min</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">Excellent atterrissage</div>
+    </div>
+    <div class="gd-rb" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3)">
+      <div style="font-weight:700;color:#fbbf24;font-family:var(--ap-font-head);font-size:.88rem">✈ Normal</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-250 à -600 ft/min</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">Acceptable</div>
+    </div>
+    <div class="gd-rb" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)">
+      <div style="font-weight:700;color:#f87171;font-family:var(--ap-font-head);font-size:.88rem">✈ Dur</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">en dessous de -600 ft/min</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">Atterrissage dur</div>
+    </div>
+    <div class="gd-rb" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3)">
+      <div style="font-weight:700;color:#a78bfa;font-family:var(--ap-font-head);font-size:.88rem">⚠ Implausible</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">0 ou supérieur à -20 ft/min</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">Erreur d'enregistrement probable</div>
+    </div>
+  </div>
+  <div class="gd-warn">
+  <strong>⚠ Ne soumettez une demande que si vous avez une preuve réelle.</strong><br><br>
+  Ce module est strictement destiné à corriger des erreurs techniques d'enregistrement – pas à améliorer vos statistiques d'atterrissage. Avant de soumettre, vous avez besoin d'une preuve concrète provenant d'un outil externe (flight tracker, outil de replay, ou capture d'écran de vos instruments au moment de l'atterrissage).<br><br>
+  <strong>Ne devinez pas.</strong> « Je pense que mon atterrissage était meilleur » n'est pas une raison valable. Si vous ne pouvez pas fournir de preuve, ne soumettez pas de demande. Les admins vérifient chaque affirmation et peuvent accéder à des données externes.<br><br>
+  Les demandes sans preuve suffisante seront <strong>refusées et enregistrées dans le journal d'audit</strong>. Les abus répétés seront signalés au personnel de la VA.
+  </div>
+</div>
+</div>
+
+<hr class="gd-hr">
+
+{{-- SECTION: SUBMIT --}}
+<div class="gd-sec" id="fr-submit">
+  <h3>✏️ Comment Soumettre une Demande de Correction</h3>
+<div class="gd-sec-body">
+  <ol class="gd-steps">
+    <li><span class="gd-n">1</span><span>Cliquez sur l'onglet <strong>Implausible</strong> – il affiche tous vos PIREPs avec des taux d'atterrissage suspects (0 ou supérieur à -20 ft/min).</span></li>
+    <li><span class="gd-n">2</span><span>Cliquez sur <strong>Corriger →</strong> à côté du vol que vous souhaitez corriger.</span></li>
+    <li><span class="gd-n">3</span><span>Entrez le <strong>taux d'atterrissage correct</strong> – doit être un nombre négatif, ex. <span class="gd-code">-180</span>. Utilisez le tableau ci-dessus comme référence.</span></li>
+    <li><span class="gd-n">4</span><span>Rédigez une <strong>raison</strong> claire (min. 10 caractères). Exemple : <em>« ACARS a perdu la connexion 2 secondes avant le toucher. L'atterrissage réel était d'environ -180 ft/min. »</em></span></li>
+    <li><span class="gd-n">5</span><span>Optionnel : joignez une <strong>capture d'écran</strong> de votre simulateur ou du journal ACARS comme preuve (JPG, PNG ou PDF, max 5 Mo).</span></li>
+    <li><span class="gd-n">6</span><span>Cochez <strong>Me notifier par email</strong> si vous souhaitez être informé quand l'admin prend sa décision.</span></li>
+    <li><span class="gd-n">7</span><span>Cliquez sur <strong>Soumettre la demande</strong>. La demande est maintenant en attente de révision par un admin.</span></li>
+  </ol>
+  <div class="gd-note"><strong>Note :</strong> Votre PIREP original reste inchangé jusqu'à ce qu'un admin approuve la demande.</div>
+</div>
+</div>
+
+<hr class="gd-hr">
+
+{{-- SECTION: STATUS --}}
+<div class="gd-sec" id="fr-status">
+  <h3>🔄 Statut de la Demande – Que Signifie Chaque État ?</h3>
+<div class="gd-sec-body">
+  <p>Consultez l'onglet <strong>Mes Demandes</strong> à tout moment pour voir l'état actuel de vos demandes :</p>
+  <div class="gd-statuslist">
+    <div class="gd-si">
+      <span class="gd-si-ico">⏳</span>
+      <div><div class="gd-si-t">En attente</div><div class="gd-si-d">Votre demande a été soumise et attend qu'un admin la révise. Aucune action requise de votre part.</div></div>
+    </div>
+    <div class="gd-si">
+      <span class="gd-si-ico" style="color:#4ade80">✓</span>
+      <div><div class="gd-si-t">Approuvé</div><div class="gd-si-d">L'admin a approuvé votre demande. Le taux d'atterrissage de votre PIREP a été mis à jour avec la valeur que vous aviez demandée.</div></div>
+    </div>
+    <div class="gd-si">
+      <span class="gd-si-ico" style="color:#f87171">✗</span>
+      <div><div class="gd-si-t">Refusé</div><div class="gd-si-d">L'admin a refusé la demande. La raison est indiquée dans la colonne Décision Admin. Vous pouvez soumettre une nouvelle demande avec de meilleures preuves.</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<hr class="gd-hr">
+
+{{-- SECTION: FAQ --}}
+<div class="gd-sec" id="fr-faq">
+  <h3>💬 Questions Fréquentes</h3>
+<div class="gd-sec-body">
+  <p class="gd-faq-q">Mon vol n'apparaît pas dans l'onglet Implausible – puis-je quand même le corriger ?</p>
+  <p class="gd-faq-a">L'onglet Implausible n'affiche que les valeurs de 0 ou supérieures à -20 ft/min. Si votre vol n'y apparaît pas mais que le taux semble incorrect, allez dans <strong>Mes Vols</strong>, trouvez le vol et utilisez le bouton <strong>Corriger →</strong>.</p>
+
+  <p class="gd-faq-q">Combien de temps dure une révision ?</p>
+  <p class="gd-faq-a">Cela dépend de la disponibilité des admins. Activez la notification par email lors de la soumission pour être informé dès qu'une décision est prise.</p>
+
+  <p class="gd-faq-q">Ma demande a été approuvée mais mon PIREP affiche toujours l'ancienne valeur.</p>
+  <p class="gd-faq-a" style="margin-bottom:0">Essayez de vider le cache de votre navigateur et de recharger la page. Si le problème persiste, contactez un admin.</p>
+</div>
+</div>
+
+{{-- ═══════════════ ADMIN ONLY SECTIONS ═══════════════ --}}
+@if(auth()->user()->hasRole('admin'))
+
+<hr class="gd-hr">
+<div class="gd-admin-section">
+  <div class="gd-admin-header">🔒 Section Admin – visible uniquement aux admins</div>
+
+  {{-- Admin Tabs --}}
+  <div class="gd-sec" id="fr-admintabs" style="margin-bottom:1.5rem">
+    <h3>🧭 Panneau Admin – Tous les Onglets Expliqués</h3>
+<div class="gd-sec-body">
+    <p>Accédez au panneau admin sur <a href="{{ url('/admin/lrc') }}" style="color:var(--ap-blue)">{{ url('/admin/lrc') }}</a>.</p>
+    <div class="gd-tip"><strong>Astuce :</strong> Le panneau admin est également accessible via la barre latérale gauche dans la zone admin de phpVMS : <strong>Addons → LR Corrections</strong>.</div>
+    <table class="gd-tbl">
+      <thead><tr><th>Onglet</th><th>Ce que vous voyez</th><th>Quand l'utiliser</th></tr></thead>
+      <tbody>
+        <tr><td>⏳ <strong>En attente</strong></td><td>Demandes ouvertes en attente de décision</td><td>File de travail principale – vérifier quotidiennement</td></tr>
+        <tr><td>✓ <strong>Approuvés</strong></td><td>Toutes les corrections approuvées</td><td>Vérifier que les corrections ont été appliquées</td></tr>
+        <tr><td>✗ <strong>Refusés</strong></td><td>Demandes refusées avec notes admin</td><td>Retrouver les raisons de refus passées</td></tr>
+        <tr><td>≡ <strong>Toutes les demandes</strong></td><td>Historique complet tous pilotes</td><td>Recherche d'audit complète</td></tr>
+        <tr><td>✦ <strong>Journal d'audit</strong></td><td>Journal chronologique – qui a décidé quoi et quand</td><td>Traçabilité des responsabilités</td></tr>
+        <tr><td>✉ <strong>Destinataires</strong></td><td>Sélectionner quels admins reçoivent les alertes email</td><td>Configuration initiale / changement d'équipe</td></tr>
+        <tr><td>⚠ <strong>PIREPs Implausibles</strong></td><td>Tous les PIREPs du site avec des taux suspects</td><td>Nettoyage proactif + Correction directe</td></tr>
+      </tbody>
+    </table>
+</div>
+  </div>
+
+  {{-- Review --}}
+  <div class="gd-sec" id="fr-review" style="margin-bottom:1.5rem">
+    <h3>🔍 Comment Réviser une Demande Pilote</h3>
+<div class="gd-sec-body">
+    <ol class="gd-steps">
+      <li><span class="gd-n">1</span><span>Allez dans <strong>⏳ En attente</strong> et cliquez sur <strong>Réviser →</strong> pour une demande.</span></li>
+      <li><span class="gd-n">2</span><span>Vérifiez les détails du vol : taux original, taux demandé, heure de soumission.</span></li>
+      <li><span class="gd-n">3</span><span>Lisez la raison du pilote et consultez les preuves jointes le cas échéant.</span></li>
+      <li><span class="gd-n">4</span><span>Entrez une <strong>Note Admin</strong> – optionnelle pour l'approbation, <strong>obligatoire</strong> pour le refus.</span></li>
+      <li><span class="gd-n">5</span><span>Cliquez sur <strong>Approuver</strong> ou <strong>Refuser</strong>. Le PIREP est mis à jour immédiatement en cas d'approbation.</span></li>
+    </ol>
+    <div class="gd-warn"><strong>Note :</strong> Les décisions ne peuvent pas être annulées via le module. Contactez un développeur si une annulation est nécessaire.</div>
+    <div class="gd-tip"><strong>Astuce :</strong> Rédigez toujours une raison de refus claire – les pilotes ont besoin de savoir quelle preuve manquait.</div>
+</div>
+  </div>
+
+  {{-- Direct Fix --}}
+  <div class="gd-sec" id="fr-direct" style="margin-bottom:1.5rem">
+    <h3>⚡ Correction Directe – Corriger Sans Demande Pilote</h3>
+<div class="gd-sec-body">
+    <p>Dans <strong>⚠ PIREPs Implausibles</strong>, chaque ligne dispose d'un formulaire de <strong>Correction directe</strong>. Cela vous permet de corriger immédiatement un taux d'atterrissage, en contournant le processus de demande.</p>
+    <div class="gd-warn"><strong>À utiliser avec précaution :</strong> Aucune entrée d'audit n'est créée du côté du pilote. N'utilisez ceci que lorsque vous êtes certain que la valeur est erronée (ex. : ACARS clair à 0 ft/min).</div>
+</div>
+  </div>
+
+  {{-- Notifications --}}
+  <div class="gd-sec" id="fr-notify" style="margin-bottom:1.5rem">
+    <h3>✉️ Configuration des Notifications Email</h3>
+<div class="gd-sec-body">
+    <p>Allez dans <strong>✉ Destinataires</strong> dans le panneau admin et cochez la case à côté de chaque admin qui doit recevoir un email quand un pilote soumet une nouvelle demande.</p>
+    <div class="gd-warn"><strong>Important :</strong> Si aucun destinataire n'est configuré, aucun email n'est envoyé. Ayez toujours au moins un admin sélectionné.</div>
+    <div class="gd-tip"><strong>Astuce :</strong> Seuls les utilisateurs avec le rôle <em>admin</em> apparaissent dans cette liste. Si quelqu'un est absent, vérifiez son rôle dans Config → Roles.</div>
+</div>
+  </div>
+
+  {{-- Frontend Navigation Links --}}
+  <div class="gd-sec" id="fr-navlinks" style="margin-bottom:0">
+    <h3>🔗 Navigation Frontend – Comment Lier ce Module</h3>
+<div class="gd-sec-body">
+    <p>Pour rendre ce module accessible aux pilotes, ajoutez un lien dans la navigation de votre thème :</p>
+
+    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 1 – Lien simple dans votre template de navigation :</p>
+    <div class="gd-codeblock">&lt;a href="@{{ url('/lrc') }}"&gt;Corrections de Taux d'Atterrissage&lt;/a&gt;</div>
+
+    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 2 – Avec la route nommée :</p>
+    <div class="gd-codeblock">&lt;a href="@{{ route('lrc.pilot.index') }}"&gt;Corrections de Taux d'Atterrissage&lt;/a&gt;</div>
+
+    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 3 – Lien direct vers un onglet spécifique :</p>
+    <div class="gd-codeblock">&lt;!-- Vers l'onglet Implausible --&gt;
+&lt;a href="@{{ url('/lrc#imp') }}"&gt;Atterrissages Implausibles&lt;/a&gt;
+
+&lt;!-- Vers l'onglet Mes Demandes --&gt;
+&lt;a href="@{{ url('/lrc#audit') }}"&gt;Mes Demandes&lt;/a&gt;
+
+&lt;!-- Vers l'onglet Guide --&gt;
+&lt;a href="@{{ url('/lrc#guide') }}"&gt;Guide LRC&lt;/a&gt;</div>
+
+    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem;margin-top:1rem">Toutes les URLs du module :</p>
+    <table class="gd-tbl">
+      <thead><tr><th>Qui</th><th>URL</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Pilote</td><td><span class="gd-code">{{ url('/lrc') }}</span></td><td>Tableau de bord pilote</td></tr>
+        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc') }}</span></td><td>Panneau admin – gestion des demandes</td></tr>
+        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc/implausible') }}</span></td><td>PIREPs implausibles + Correction directe</td></tr>
+      </tbody>
+    </table>
+</div>
   </div>
 
 </div>{{-- gd-admin-section --}}

@@ -50,9 +50,16 @@ class LandingRateCorrectionServiceProvider extends ServiceProvider
 
     protected function registerTranslations(): void
     {
-        $langPath = resource_path('lang/modules/landingratecorecorrection');
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, 'landingratecorecorrection');
+        // Published override path (takes priority if it exists)
+        $publishedPath = resource_path('lang/modules/landingratecorecorrection');
+
+        // Module's own lang folder (always available)
+        $modulePath = module_path('LandingRateCorrection', 'Resources/lang');
+
+        if (is_dir($publishedPath)) {
+            $this->loadTranslationsFrom($publishedPath, 'landingratecorecorrection');
+        } else {
+            $this->loadTranslationsFrom($modulePath, 'landingratecorecorrection');
         }
     }
 
