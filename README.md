@@ -451,7 +451,13 @@ All requests — approved or rejected — are permanently logged in the audit tr
 
 ## License
 
-MIT License — see [LICENSE](LICENSE)
+Modified BSD 3-Clause — see [LICENSE](LICENSE) for details.  
+Copyright © 2025 German Sky Group
+
+## Credits
+
+Built for [phpVMS 7](https://phpvms.net) by Nabeel Shahzad.  
+Inspired by the phpVMS community and [Disposable Hero Addons](https://github.com/FatihKoz) by B.Fatih KOZ.
 
 ---
 

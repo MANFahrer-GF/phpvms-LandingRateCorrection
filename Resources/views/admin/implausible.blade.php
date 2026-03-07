@@ -7,6 +7,18 @@
         ← Back to Requests
     </a>
 </li>
+
+{{-- ── LRC Footer ── --}}
+<center style="color:gray;font-size:12px;opacity:0.5;transition:opacity .2s;margin-top:2.5rem;padding-bottom:1rem;display:block"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='0.5'">
+  <a href="https://github.com/MANFahrer-GF" target="_blank"
+     style="color:gray;text-decoration:none">Landing Rate Corrections</a>
+  &mdash; crafted with
+  <span style="color:#e25555;animation:lrc-pulse 1.8s ease-in-out infinite">&#9829;</span>
+  in Germany by Thomas Kant
+</center>
+<style>@keyframes lrc-pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+
 @endsection
 
 @section('content')
