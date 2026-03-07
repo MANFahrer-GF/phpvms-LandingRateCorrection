@@ -5,6 +5,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.1.2] — 2026-03-07
+
+### Added
+- **Page footer** — all 5 views (pilot dashboard, create form, admin panel, implausible list, review page) now show the SkyOps-style attribution footer:
+  - Matches the SkyOps design exactly: 50% opacity, 85% on hover, pulsing heart
+  - Link points to the GitHub repository
+  - `Landing Rate Corrections — crafted with ♥ in Germany by Thomas Kant`
+
+### Changed
+- **LICENSE** replaced — was MIT, now **Modified BSD 3-Clause** with additional restrictions:
+  - Redistribution requires written approval of copyright holder
+  - Only blade view files may be redistributed by 3rd-party themes
+  - Software name and link must remain visible in all page footers
+  - Non-compliance results in removal of access to future updates and support
+- **README** updated to reflect correct license (Modified BSD 3-Clause) and credits section added
+
+---
+
 ## [1.1.1] — 2026-03-06
 
 ### Fixed
