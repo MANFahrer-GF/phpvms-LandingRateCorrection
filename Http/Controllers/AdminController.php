@@ -4,6 +4,7 @@ namespace Modules\LandingRateCorrection\Http\Controllers;
 
 use App\Models\Pirep;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -46,6 +47,9 @@ class AdminController extends Controller
 
         } elseif ($tab === 'mail') {
             // Mail templates loaded in view via MailSetting::get()
+
+        } elseif ($tab === 'appearance') {
+            // Appearance settings loaded in view via MailSetting::get()
 
         } else {
             $statusFilter = in_array($tab, ['pending', 'approved', 'rejected']) ? $tab : null;
@@ -236,5 +240,68 @@ class AdminController extends Controller
         }
 
         return back()->with('success', 'Mail templates saved successfully.');
+    }
+
+    public function saveAppearance(Request $request)
+    {
+        $validated = $request->validate([
+            'glass_mode'           => ['nullable', 'string', 'in:1,0'],
+            'solid_card'           => ['nullable', 'string', 'max:20'],
+            'solid_border'         => ['nullable', 'string', 'max:20'],
+            'solid_surface'        => ['nullable', 'string', 'max:20'],
+            'solid_select'         => ['nullable', 'string', 'max:20'],
+            'solid_kpi'            => ['nullable', 'string', 'max:20'],
+            'solid_accent'         => ['nullable', 'string', 'max:20'],
+            'solid_card_light'     => ['nullable', 'string', 'max:20'],
+            'solid_border_light'   => ['nullable', 'string', 'max:20'],
+            'solid_surface_light'  => ['nullable', 'string', 'max:20'],
+            'solid_select_light'   => ['nullable', 'string', 'max:20'],
+            'solid_kpi_light'      => ['nullable', 'string', 'max:20'],
+            'solid_accent_light'   => ['nullable', 'string', 'max:20'],
+        ]);
+
+        MailSetting::set('appearance_glass_mode',           $validated['glass_mode']          ?? '1');
+        MailSetting::set('appearance_solid_card',           $validated['solid_card']          ?? '#1a1f2e');
+        MailSetting::set('appearance_solid_border',         $validated['solid_border']        ?? '#2a3040');
+        MailSetting::set('appearance_solid_surface',        $validated['solid_surface']       ?? '#171c28');
+        MailSetting::set('appearance_solid_select',         $validated['solid_select']        ?? '#1e2535');
+        MailSetting::set('appearance_solid_kpi',            $validated['solid_kpi']           ?? '#0f1420');
+        MailSetting::set('appearance_solid_accent',         $validated['solid_accent']        ?? '#3b82f6');
+        MailSetting::set('appearance_solid_card_light',     $validated['solid_card_light']    ?? '#ffffff');
+        MailSetting::set('appearance_solid_border_light',   $validated['solid_border_light']  ?? '#e2e8f0');
+        MailSetting::set('appearance_solid_surface_light',  $validated['solid_surface_light'] ?? '#f8fafc');
+        MailSetting::set('appearance_solid_select_light',   $validated['solid_select_light']  ?? '#f1f5f9');
+        MailSetting::set('appearance_solid_kpi_light',      $validated['solid_kpi_light']     ?? '#e2e8f0');
+        MailSetting::set('appearance_solid_accent_light',   $validated['solid_accent_light']  ?? '#2563eb');
+
+        return back()->with('success', 'Appearance settings saved.');
+    }
+
+    /**
+     * Reset all appearance settings to defaults.
+     */
+    public function resetAppearance(): RedirectResponse
+    {
+        // Reset to Glass mode
+        MailSetting::set('appearance_glass_mode', '1');
+
+        // Reset Dark mode colors
+        MailSetting::set('appearance_solid_card',    '#1a1f2e');
+        MailSetting::set('appearance_solid_border',  '#2a3040');
+        MailSetting::set('appearance_solid_surface', '#171c28');
+        MailSetting::set('appearance_solid_select',  '#1e2535');
+        MailSetting::set('appearance_solid_kpi',     '#0f1420');
+        MailSetting::set('appearance_solid_accent',  '#3b82f6');
+
+        // Reset Light mode colors
+        MailSetting::set('appearance_solid_card_light',    '#ffffff');
+        MailSetting::set('appearance_solid_border_light',  '#e2e8f0');
+        MailSetting::set('appearance_solid_surface_light', '#f8fafc');
+        MailSetting::set('appearance_solid_select_light',  '#f1f5f9');
+        MailSetting::set('appearance_solid_kpi_light',     '#e2e8f0');
+        MailSetting::set('appearance_solid_accent_light',  '#2563eb');
+
+        return redirect()->route('lrc.admin.index', ['tab' => 'appearance'])
+            ->with('success', 'Appearance settings reset to defaults (Glass mode).');
     }
 }

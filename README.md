@@ -49,7 +49,10 @@ Without this module there is no official process for a pilot to flag and correct
 - **Email notifications** — admins notified on new requests, pilots notified on decisions
 - **Configurable recipients** — choose exactly which admins receive email alerts
 - **Evidence upload** — JPG, PNG, GIF or PDF up to 5 MB
-- **Built-in guide** — bilingual (DE/EN) documentation tab for pilots; extended admin section visible only to admins
+- **Glass/Solid Mode** — Glass (transparent, backdrop blur) or Solid (opaque, custom colors) display mode
+- **Color customization** — 12 color pickers for Solid mode (dark + light theme)
+- **Multi-language support** — 9 languages included (DE/EN 100%, others ready to translate)
+- **Built-in guide** — fully translated documentation tab for pilots; extended admin section visible only to admins
 - **Dark/light theme support** — compatible with AirlinePulse and SPTheme
 
 ---
@@ -421,31 +424,26 @@ All requests — approved or rejected — are permanently logged in the audit tr
 
 ## Changelog
 
-### v1.0.0 — 2026-03-05
+See [CHANGELOG.md](CHANGELOG.md) for full version history.
+
+### v1.2.3 — 2025-03-10 (Latest)
 
 **Added**
-- Pilot dashboard with My Flights, Implausible, My Requests, and Guide tabs
-- Implausible PIREP detection (0 ft/min, positive, or shallower than -20 ft/min)
-- Correction request workflow with reason field and evidence file upload
-- Admin panel with Pending, Approved, Rejected, All, Audit Log, and Recipients tabs
-- Admin Direct Fix for implausible PIREPs without requiring a pilot request
-- Configurable email notification recipients
-- Email to admins on new pilot request; email to pilot on admin decision
-- Built-in bilingual guide (DE/EN) with admin-only sections
-- Full dark/light theme support (AirlinePulse / SPTheme compatible)
+- Glass/Solid Mode — choose between transparent or opaque display style
+- 12 color pickers for Solid mode customization (dark + light)
+- Reset to Defaults button in admin panel
+- Full i18n support for Guide — 108 translation keys
+- 9 languages: DE/EN (100%), es/fr/it/ja/pt-br/pt-pt/tr (English fallback)
+- TRANSLATION_GUIDE.md for VA admins
 
-**Security**
-- CSRF protection on all forms
-- Auth + role middleware on all routes
-- Ownership check: pilots can only correct their own PIREPs
-- Admin-only validation on recipient list (non-admin IDs rejected)
-- Sanitized filenames in storage and HTTP response headers
-- Race condition protection on approve/reject with DB-level re-check
+**Fixed**
+- Admin color pickers not saving
+- Guide panel not receiving Solid mode background
+- Translation keys showing as raw strings
 
-**Performance**
-- Composite DB index on `(pilot_id, status)` for pilot dashboard queries
-- Eager loading on all Eloquent relations (no N+1 queries)
-- Pagination on all admin and pilot tables
+### v1.0.0 — 2025-03-05
+
+First public release with full pilot/admin workflow, email notifications, and built-in guide.
 
 ---
 

@@ -14,6 +14,8 @@ use Modules\LandingRateCorrection\Models\LandingRateCorrection;
 use Modules\LandingRateCorrection\Models\NotificationRecipient;
 use Modules\LandingRateCorrection\Notifications\CorrectionSubmittedNotification;
 
+use Modules\LandingRateCorrection\Models\MailSetting;
+
 class PilotController extends Controller
 {
     public function __construct()
@@ -58,9 +60,25 @@ class PilotController extends Controller
             ->limit(100)
             ->get();
 
+        $appearance = [
+            'glass_mode'   => MailSetting::get('appearance_glass_mode',   '1') === '1',
+            'card'         => MailSetting::get('appearance_solid_card',    '#1a1f2e'),
+            'border'       => MailSetting::get('appearance_solid_border',  '#2a3040'),
+            'surface'      => MailSetting::get('appearance_solid_surface', '#171c28'),
+            'select'       => MailSetting::get('appearance_solid_select',  '#1e2535'),
+            'kpi'          => MailSetting::get('appearance_solid_kpi',     '#0f1420'),
+            'accent'       => MailSetting::get('appearance_solid_accent',  '#3b82f6'),
+            'card_l'       => MailSetting::get('appearance_solid_card_light',    '#ffffff'),
+            'border_l'     => MailSetting::get('appearance_solid_border_light',  '#e2e8f0'),
+            'surface_l'    => MailSetting::get('appearance_solid_surface_light', '#f8fafc'),
+            'select_l'     => MailSetting::get('appearance_solid_select_light',  '#f1f5f9'),
+            'kpi_l'        => MailSetting::get('appearance_solid_kpi_light',     '#e2e8f0'),
+            'accent_l'     => MailSetting::get('appearance_solid_accent_light',  '#2563eb'),
+        ];
+
         return view('landingratecorecorrection::pilot.index',
             compact('pireps', 'corrections', 'windowDays', 'threshold',
-                    'implausiblePireps', 'auditLog'));
+                    'implausiblePireps', 'auditLog', 'appearance'));
     }
 
     public function create(string $pirepId)
@@ -81,7 +99,23 @@ class PilotController extends Controller
                 ->with('error', "This PIREP is older than {$windowDays} days and can no longer be corrected.");
         }
 
-        return view('landingratecorecorrection::pilot.create', compact('pirep'));
+        $appearance = [
+            'glass_mode' => MailSetting::get('appearance_glass_mode',   '1') === '1',
+            'card'       => MailSetting::get('appearance_solid_card',    '#1a1f2e'),
+            'border'     => MailSetting::get('appearance_solid_border',  '#2a3040'),
+            'surface'    => MailSetting::get('appearance_solid_surface', '#171c28'),
+            'select'     => MailSetting::get('appearance_solid_select',  '#1e2535'),
+            'kpi'        => MailSetting::get('appearance_solid_kpi',     '#0f1420'),
+            'accent'     => MailSetting::get('appearance_solid_accent',  '#3b82f6'),
+            'card_l'     => MailSetting::get('appearance_solid_card_light',    '#ffffff'),
+            'border_l'   => MailSetting::get('appearance_solid_border_light',  '#e2e8f0'),
+            'surface_l'  => MailSetting::get('appearance_solid_surface_light', '#f8fafc'),
+            'select_l'   => MailSetting::get('appearance_solid_select_light',  '#f1f5f9'),
+            'kpi_l'      => MailSetting::get('appearance_solid_kpi_light',     '#e2e8f0'),
+            'accent_l'   => MailSetting::get('appearance_solid_accent_light',  '#2563eb'),
+        ];
+
+        return view('landingratecorecorrection::pilot.create', compact('pirep', 'appearance'));
     }
 
     public function store(Request $request, string $pirepId)

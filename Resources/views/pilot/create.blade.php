@@ -2,6 +2,7 @@
 @extends('app')
 
 @php
+$isGlass = $appearance['glass_mode'];
 $lang = str_starts_with(app()->getLocale(), 'en') ? 'en' : 'de';
 $t = [
   'title'        => $lang==='en' ? 'Submit Correction Request'      : 'Korrekturantrag stellen',
@@ -62,14 +63,20 @@ $t = [
   --ap-font-mono: 'JetBrains Mono', monospace;
   --ap-font-body: 'Inter', sans-serif;
   /* dark defaults */
-  --ap-bg:     #161b2e; --ap-surface: rgba(255,255,255,.04);
-  --ap-border: rgba(255,255,255,.08); --ap-border2: rgba(255,255,255,.18);
+  --ap-bg:     #161b2e; --ap-surface: {{ $isGlass ? 'rgba(255,255,255,0.04)' : $appearance['surface'] }};
+  --ap-border: {{ $isGlass ? 'rgba(255,255,255,0.08)' : $appearance['border']  }}; --ap-border2: #3a4560;
+  --ap-input-bg: {{ $isGlass ? 'rgba(255,255,255,0.05)' : $appearance['select']  }};
+  --ap-kpi-bg: {{ $isGlass ? 'rgba(255,255,255,0.03)' : $appearance['kpi']    }};
+  --ap-blue: {{ $appearance['accent'] }};
   --ap-text:   #e2e8f0; --ap-text-head: #fff; --ap-muted: #94a3b8;
   --ap-input-bg: rgba(255,255,255,.05);
 }
 html.ap-light {
-  --ap-bg:     #f1f5f9; --ap-surface: rgba(255,255,255,.9);
-  --ap-border: rgba(0,0,0,.1); --ap-border2: rgba(0,0,0,.2);
+  --ap-bg:     #f1f5f9; --ap-surface: {{ $isGlass ? 'rgba(255,255,255,0.9)'  : $appearance['surface_l'] }};
+  --ap-border: {{ $isGlass ? 'rgba(0,0,0,0.1)'        : $appearance['border_l']  }}; --ap-border2: #cbd5e1;
+  --ap-input-bg: {{ $isGlass ? '#ffffff'                 : $appearance['select_l']  }};
+  --ap-kpi-bg: {{ $isGlass ? 'rgba(255,255,255,0.8)'  : $appearance['kpi_l']    }};
+  --ap-blue: {{ $appearance['accent_l'] }};
   --ap-text:   #1e293b; --ap-text-head: #0f172a; --ap-muted: #64748b;
   --ap-input-bg: #fff;
 }
@@ -316,15 +323,32 @@ textarea.lrc-inp { resize:vertical;min-height:110px; }
 
 </div>
 
-{{-- ── LRC Footer ── --}}
-<center style="color:gray;font-size:12px;opacity:0.5;transition:opacity .2s;margin-top:2.5rem;padding-bottom:1rem;display:block"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='0.5'">
-  <a href="https://github.com/MANFahrer-GF" target="_blank"
-     style="color:gray;text-decoration:none">Landing Rate Corrections</a>
+{{-- ── LRC Footer (always glass mode) ── --}}
+<style>
+.lrc-footer {
+  text-align: center;
+  color: gray;
+  font-size: 12px;
+  opacity: 0.4;
+  transition: opacity .2s;
+  margin-top: 2.5rem;
+  padding: 1rem;
+  max-width: 920px;
+  margin-left: auto;
+  margin-right: auto;
+  background: transparent !important;
+}
+.lrc-footer:hover { opacity: 0.75; }
+.lrc-footer a { color: gray; text-decoration: none; }
+.lrc-footer a:hover { text-decoration: underline; }
+.lrc-footer-heart { color: #e25555; animation: lrc-pulse 1.8s ease-in-out infinite; }
+@keyframes lrc-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+<div class="lrc-footer">
+  <a href="https://github.com/MANFahrer-GF" target="_blank">Landing Rate Corrections</a>
   &mdash; crafted with
-  <span style="color:#e25555;animation:lrc-pulse 1.8s ease-in-out infinite">&#9829;</span>
+  <span class="lrc-footer-heart">&#9829;</span>
   in Germany by Thomas Kant
-</center>
-<style>@keyframes lrc-pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+</div>
 
 @endsection

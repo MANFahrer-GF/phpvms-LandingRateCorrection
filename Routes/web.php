@@ -27,6 +27,8 @@ Route::prefix('admin/lrc')->name('lrc.admin.')->middleware(['auth', 'role:admin'
     Route::post('/implausible/{pirepId}/fix', [AdminController::class, 'fixImplausible'])->name('fix_implausible');
     Route::post('/recipients',                [AdminController::class, 'saveRecipients'])->name('save_recipients');
     Route::post('/mail-templates',            [AdminController::class, 'saveMailTemplates'])->name('save_mail_templates');
+    Route::post('/appearance',                [AdminController::class, 'saveAppearance'])->name('save_appearance');
+    Route::post('/appearance/reset',          [AdminController::class, 'resetAppearance'])->name('reset_appearance');
     Route::get('/{correctionId}',             [AdminController::class, 'show'])->name('show');
     Route::post('/{correctionId}/approve',    [AdminController::class, 'approve'])->name('approve');
     Route::post('/{correctionId}/reject',     [AdminController::class, 'reject'])->name('reject');

@@ -5,7 +5,61 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.1.2] — 2026-03-07
+## [1.2.3] — 2025-03-10
+
+### Added
+- **Glass/Solid Mode** — new admin setting under Appearance tab
+  - **Glass Mode** (default): transparent cards with backdrop blur, theme background shows through
+  - **Solid Mode**: opaque cards with customizable colors, ideal for themes with background images
+  - 12 color pickers for Solid Mode (6 dark + 6 light): Card, Border, Surface, Selected Row, KPI boxes, Accent
+  - CSS architecture refactored: `.lrc-glass` / `.lrc-solid` wrapper classes control all styling
+- **Reset to Defaults** button in admin Appearance tab — resets to Glass mode + all default colors
+- **Full i18n support for Guide** — all 108 text strings now use Laravel translation system
+  - Translation namespace: `lrc::lrc.guide_*`
+  - German (de) and English (en) 100% translated
+  - 7 additional languages prepared with English fallback: es, fr, it, ja, pt-br, pt-pt, tr
+- **TRANSLATION_GUIDE.md** — documentation for VA admins on how to add/edit translations
+
+### Changed
+- **Footer** always renders in Glass mode (transparent) regardless of Solid/Glass setting
+- **Footer** moved outside `.lrc-wrap` container — no longer affected by mode switching
+- **Footer** removed from admin pages (index, show, implausible) — only visible on pilot-facing pages
+- **Admin action buttons** improved click targets with proper padding and inline-block display
+- **Guide** unified into single Blade template using `__('lrc::lrc.key')` — removed duplicate EN/DE/FR hardcoded blocks
+- **Translation namespace** simplified from `landingratecorecorrection` to `lrc` for cleaner syntax
+
+### Fixed
+- **Admin color pickers** not saving — form field names had incorrect prefix (`solid_solid_card` instead of `solid_card`)
+- **Guide panel** not receiving Solid mode background — was outside `.lrc-wrap` container
+- **Translation keys** showing as raw strings (`lrc::lrc.guide_title`) — ServiceProvider namespace mismatch fixed
+- **RedirectResponse type error** on Reset to Defaults — missing `use` import in AdminController
+
+### Technical
+- Pilot index.blade.php reduced from 1616 to 1143 lines (removed duplicate language blocks)
+- CSS variables for Glass mode defined without PHP conditionals
+- User-defined Solid colors injected via `@if(!$isGlass)` conditional style block
+- Guide wrapper `.lrc-guide-box` connects visually to tabs in Solid mode (border-radius: 0 0 14px 14px)
+
+---
+
+## [1.1.3] — 2025-03-07
+
+### Fixed
+- **CSS transparency bug** — structural background variables were `rgba` (3–90% opacity), causing cards, tables and navigation to be see-through when the phpVMS theme uses a background image or colored backdrop
+  - `--ap-surface`, `--ap-border`, `--ap-border2`, `--ap-card-bg` now use solid hex colors in both dark and light mode
+  - `backdrop-filter: blur()` removed — not needed and unreliable across browsers
+  - Decorative `rgba` values (badges, hover effects, focus rings, status indicators) unchanged — these sit on now-solid backgrounds
+  - Affects: `pilot/index.blade.php`, `pilot/create.blade.php`
+
+| Variable | Dark (before) | Dark (after) | Light (before) | Light (after) |
+|---|---|---|---|---|
+| `--ap-surface` | `rgba(255,255,255,0.04)` | `#1a1f2e` | `rgba(255,255,255,0.9)` | `#ffffff` |
+| `--ap-card-bg` | `rgba(255,255,255,0.03)` | `#171c28` | `rgba(255,255,255,0.8)` | `#f8fafc` |
+| `--ap-border` | `rgba(255,255,255,0.08)` | `#2a3040` | `rgba(0,0,0,0.1)` | `#e2e8f0` |
+
+---
+
+## [1.1.2] — 2025-03-07
 
 ### Added
 - **Page footer** — all 5 views (pilot dashboard, create form, admin panel, implausible list, review page) now show the SkyOps-style attribution footer:
@@ -23,7 +77,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.1.1] — 2026-03-06
+## [1.1.1] — 2025-03-06
 
 ### Fixed
 - `Undefined variable $lang` error on the Guide tab — replaced remaining `$lang` references with `app()->getLocale()` after the v1.2.0 lang file refactor
@@ -45,7 +99,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.1.0] — 2026-03-06
+## [1.1.0] — 2025-03-06
 
 ### Added
 - Admin URL in guide displayed as a clickable link
@@ -77,7 +131,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.0.0] — 2026-03-05
+## [1.0.0] — 2025-03-05
 
 First public release.
 

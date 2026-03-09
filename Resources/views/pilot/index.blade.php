@@ -1,6 +1,6 @@
 {{-- LandingRateCorrection :: pilot/index.blade.php --}}
 @extends('app')
-@section('title', __('landingratecorecorrection::lrc.title'))
+@section('title', __('lrc::lrc.title'))
 
 @php
 // UI translations — add new languages in Resources/lang/{locale}/lrc.php
@@ -11,10 +11,11 @@ foreach (['title','subtitle','tab_flights','tab_imp','tab_audit','tab_guide',
           'pending','approved','rejected','no_flights','no_imp','no_req',
           'imp_title','imp_desc','your_reason','admin_reply','instead_of',
           'awaiting','no_val'] as $k) {
-    $t[$k] = __('landingratecorecorrection::lrc.' . $k);
+    $t[$k] = __('lrc::lrc.' . $k);
 }
 $impCount  = $implausiblePireps->count();
 $pendCount = $auditLog->where('status','pending')->count();
+$isGlass   = $appearance['glass_mode'];
 @endphp
 
 @section('content')
@@ -59,11 +60,14 @@ $pendCount = $auditLog->where('status','pending')->count();
   --ap-font-head: 'Outfit', sans-serif;
   --ap-font-mono: 'JetBrains Mono', monospace;
   --ap-font-body: 'Inter', sans-serif;
-  /* dark defaults */
+  /* dark defaults (Glass mode) */
   --ap-surface:  rgba(255,255,255,0.04);
   --ap-border:   rgba(255,255,255,0.08);
   --ap-border2:  rgba(255,255,255,0.18);
-  --ap-card-bg:  rgba(255,255,255,0.03);
+  --ap-card-bg:  transparent;
+  --ap-select-bg:rgba(255,255,255,0.05);
+  --ap-kpi-bg:   rgba(255,255,255,0.03);
+  --ap-blue:     {{ $appearance['accent'] }};
   --ap-text:     #e2e8f0;
   --ap-text-head:#ffffff;
   --ap-muted:    #94a3b8;
@@ -74,11 +78,15 @@ html.ap-light {
   --ap-border:   rgba(0,0,0,0.1);
   --ap-border2:  rgba(0,0,0,0.2);
   --ap-card-bg:  rgba(255,255,255,0.8);
+  --ap-select-bg:#ffffff;
+  --ap-kpi-bg:   rgba(255,255,255,0.8);
+  --ap-blue:     {{ $appearance['accent_l'] }};
   --ap-text:     #1e293b;
   --ap-text-head:#0f172a;
   --ap-muted:    #64748b;
   --ap-tag-bg:   rgba(0,0,0,0.06);
 }
+
 
 /* ── Wrapper ── */
 .lrc-wrap {
@@ -117,7 +125,11 @@ html.ap-light .lrc-alert-er { color: #991b1b; }
   display: flex; gap: 0;
   border-bottom: 1px solid var(--ap-border2);
   margin-bottom: 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.lrc-tabs::-webkit-scrollbar { display: none; }
 .lrc-tab {
   display: inline-flex; align-items: center; gap: .4rem;
   padding: .65rem 1.2rem; font-size: .875rem; font-weight: 600;
@@ -126,6 +138,7 @@ html.ap-light .lrc-alert-er { color: #991b1b; }
   border: none; background: none;
   border-bottom: 2px solid transparent; margin-bottom: -1px;
   transition: color .15s, border-color .15s;
+  white-space: nowrap; flex-shrink: 0;
 }
 .lrc-tab:hover { color: var(--ap-text); }
 .lrc-tab.on { color: var(--ap-blue); border-bottom-color: var(--ap-blue); }
@@ -141,17 +154,155 @@ html.ap-light .lrc-alert-er { color: #991b1b; }
 .lrc-panel { display: none; }
 .lrc-panel.on { display: block; }
 
-/* ── Glass card – same as AirlinePulse ap-glass ── */
+/* ── Card Base ── */
 .lrc-card {
-  background: var(--ap-card-bg);
-  border: 1px solid var(--ap-border);
   border-radius: 14px;
   overflow: hidden;
   margin-bottom: 1.25rem;
+  transition: border-color .2s, box-shadow .2s;
 }
-html.ap-light .lrc-card {
-  background: rgba(255,255,255,0.85);
-  box-shadow: 0 2px 16px rgba(0,0,0,.07);
+.lrc-card:hover { border-color: var(--ap-border2); }
+
+/* ══ GLASS MODE ══ */
+.lrc-glass .lrc-card {
+  background: var(--ap-card-bg);
+  border: 1px solid var(--ap-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+html.ap-light .lrc-glass .lrc-card {
+  box-shadow: 0 2px 16px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.05);
+}
+.lrc-glass .lrc-panel {
+  background: transparent;
+}
+.lrc-glass .lrc-hero {
+  background: transparent;
+}
+.lrc-glass .lrc-tabs {
+  background: transparent;
+}
+
+/* ══ SOLID MODE ══ */
+.lrc-solid .lrc-card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: #1a2235;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+html.ap-light .lrc-solid .lrc-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+/* Solid Mode: Table headers */
+.lrc-solid .lrc-t thead th {
+  background: #1e293b;
+}
+html.ap-light .lrc-solid .lrc-t thead th {
+  background: #f0f0f0;
+}
+/* Solid Mode: Implausible section */
+.lrc-solid .lrc-imp-wrap {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: #1a2235;
+}
+html.ap-light .lrc-solid .lrc-imp-wrap {
+  background: #fff5f5;
+}
+/* Solid Mode: Tabs */
+.lrc-solid .lrc-tabs {
+  background: #1a2235;
+  border-radius: 14px 14px 0 0;
+  padding: 0 .5rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 0;
+}
+html.ap-light .lrc-solid .lrc-tabs {
+  background: #f8fafc;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+/* Solid Mode: Panels connected to tabs */
+.lrc-solid .lrc-panel {
+  background: #1a2235;
+  border-radius: 0 0 14px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-top: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  padding: 1rem;
+}
+html.ap-light .lrc-solid .lrc-panel {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-top: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+/* Panel with guide-box: let box handle styling */
+.lrc-solid #lrc-panel-guide {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+/* Solid Mode: Cards inside panels shouldn't double up */
+.lrc-solid .lrc-panel .lrc-card {
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+  margin-bottom: 0;
+  background: transparent;
+}
+/* Solid Mode: Hero Section */
+.lrc-solid .lrc-hero {
+  background: #1a2235;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  margin-bottom: 1.25rem;
+}
+html.ap-light .lrc-solid .lrc-hero {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+/* Solid Mode: Guide container (gesamtes Handbuch) */
+.lrc-solid .gd {
+  background: #1a2235;
+  border-radius: 14px;
+  padding: 1.5rem !important;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+html.ap-light .lrc-solid .gd {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+/* Guide inside panel: no double background */
+.lrc-solid .lrc-panel .gd {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 0 !important;
+}
+/* Solid Mode: Guide cards (navigation tiles) */
+.lrc-solid .gd-c {
+  background: #0f1623;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+html.ap-light .lrc-solid .gd-c {
+  background: #f8fafc;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+/* Solid Mode: Guide sections content */
+.lrc-solid .gd-sec-body {
+  background: #0f1623;
+}
+html.ap-light .lrc-solid .gd-sec-body {
+  background: #f8fafc;
 }
 
 /* ── Table ── */
@@ -163,10 +314,11 @@ html.ap-light .lrc-card {
   font-family: var(--ap-font-head);
   font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
   color: var(--ap-muted);
-  background: var(--ap-surface);
+  background: var(--ap-surface) !important;
   border-bottom: 1px solid var(--ap-border2);
   font-weight: 600; white-space: nowrap;
 }
+html.ap-light .lrc-t thead th { background: var(--ap-surface) !important; }
 .lrc-t tbody td {
   padding: .45rem 1rem;
   border-bottom: 1px solid var(--ap-border);
@@ -175,7 +327,7 @@ html.ap-light .lrc-card {
   color: var(--ap-text);
 }
 .lrc-t tbody tr:last-child > td { border-bottom: none; }
-.lrc-t tbody tr:hover > td { background: var(--ap-surface); }
+.lrc-t tbody tr:hover > td { background: var(--ap-surface) !important; }
 
 /* Row status indicators */
 .lrc-t tbody tr.rs-pen > td:first-child { border-left: 3px solid var(--ap-amber); }
@@ -257,7 +409,7 @@ html.ap-light .lrc-btn-imp { color: #991b1b; }
 .lrc-note-wa { background: rgba(245,158,11,.07); border-left: 3px solid var(--ap-amber); }
 
 /* ── Implausible banner ── */
-.lrc-imp-wrap { background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.25); border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; }
+.lrc-imp-wrap { background: var(--ap-kpi-bg); border: 1px solid rgba(239,68,68,.4); border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; }
 .lrc-imp-head { padding: .75rem 1.2rem; background: rgba(239,68,68,.12); border-bottom: 1px solid rgba(239,68,68,.2); }
 .lrc-imp-head h6 { margin: 0; font-size: .95rem; font-weight: 700; font-family: var(--ap-font-head); color: #f87171; }
 .lrc-imp-desc { padding: .45rem 1.2rem .3rem; font-size: .8rem; color: var(--ap-muted); }
@@ -277,12 +429,66 @@ html.ap-light .lrc-ap-er { color: #991b1b; }
 .lrc-foot { display: flex; justify-content: space-between; align-items: center; padding: .65rem 1.2rem; border-top: 1px solid var(--ap-border); flex-wrap: wrap; gap: .5rem; }
 .lrc-legend { display: flex; flex-wrap: wrap; gap: .65rem; font-size: .77rem; color: var(--ap-muted); align-items: center; font-family: var(--ap-font-mono); }
 
+/* ── LRC Footer (always glass/transparent) ── */
+.lrc-footer {
+  text-align: center;
+  color: var(--ap-muted);
+  font-size: 12px;
+  opacity: 0.4;
+  transition: opacity .2s;
+  margin-top: 2.5rem;
+  padding: 1rem;
+  max-width: 920px;
+  margin-left: auto;
+  margin-right: auto;
+  /* Always transparent - never solid */
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.lrc-footer:hover { opacity: 0.75; }
+.lrc-footer a {
+  color: var(--ap-muted);
+  text-decoration: none;
+}
+.lrc-footer a:hover { text-decoration: underline; }
+.lrc-footer-heart {
+  color: #e25555;
+  animation: lrc-pulse 1.8s ease-in-out infinite;
+}
+@keyframes lrc-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
 /* ── Empty state ── */
 .lrc-empty { text-align: center; padding: 3rem; color: var(--ap-muted); font-family: var(--ap-font-head); }
 .lrc-empty .lrc-empty-ico { font-size: 2.5rem; display: block; margin-bottom: .75rem; }
 </style>
 
-<div class="lrc-wrap">
+@if(!$isGlass)
+<style>
+/* Solid Mode: User-defined colors from settings */
+.lrc-solid .lrc-hero                      { background: {{ $appearance['card']     }} !important; border-color: {{ $appearance['border'] }} !important; }
+html.ap-light .lrc-solid .lrc-hero        { background: {{ $appearance['card_l']   }} !important; border-color: {{ $appearance['border_l'] }} !important; }
+.lrc-solid .lrc-tabs                      { background: {{ $appearance['card']     }} !important; border-color: {{ $appearance['border'] }} !important; }
+html.ap-light .lrc-solid .lrc-tabs        { background: {{ $appearance['card_l']   }} !important; border-color: {{ $appearance['border_l'] }} !important; }
+.lrc-solid .lrc-panel                     { background: {{ $appearance['card']     }} !important; border-color: {{ $appearance['border'] }} !important; }
+html.ap-light .lrc-solid .lrc-panel       { background: {{ $appearance['card_l']   }} !important; border-color: {{ $appearance['border_l'] }} !important; }
+.lrc-solid .gd                            { background: {{ $appearance['card']     }} !important; border-color: {{ $appearance['border'] }} !important; }
+html.ap-light .lrc-solid .gd              { background: {{ $appearance['card_l']   }} !important; border-color: {{ $appearance['border_l'] }} !important; }
+.lrc-solid .lrc-guide-box                 { background: {{ $appearance['card']     }} !important; border-color: {{ $appearance['border'] }} !important; }
+html.ap-light .lrc-solid .lrc-guide-box   { background: {{ $appearance['card_l']   }} !important; border-color: {{ $appearance['border_l'] }} !important; }
+.lrc-solid .lrc-card                      { background: {{ $appearance['card']     }} !important; }
+html.ap-light .lrc-solid .lrc-card        { background: {{ $appearance['card_l']   }} !important; }
+.lrc-solid .lrc-t thead th                { background: {{ $appearance['surface']  }} !important; }
+html.ap-light .lrc-solid .lrc-t thead th  { background: {{ $appearance['surface_l']}} !important; }
+.lrc-solid .lrc-t tbody tr:hover > td     { background: {{ $appearance['surface']  }} !important; }
+html.ap-light .lrc-solid .lrc-t tbody tr:hover > td { background: {{ $appearance['surface_l']}} !important; }
+.lrc-solid .gd-c, .lrc-solid .gd-sec-body, .lrc-solid .lrc-imp-wrap { background: {{ $appearance['kpi'] }} !important; }
+html.ap-light .lrc-solid .gd-c,
+html.ap-light .lrc-solid .gd-sec-body     { background: {{ $appearance['kpi_l']    }} !important; }
+</style>
+@endif
+
+<div class="lrc-wrap {{ $isGlass ? 'lrc-glass' : 'lrc-solid' }}">
 
 {{-- Hero --}}
 <div class="lrc-hero">
@@ -545,7 +751,7 @@ html.ap-light .lrc-ap-er { color: #991b1b; }
 @endif
 </div>
 
-</div>{{-- /.lrc-wrap --}}
+{{-- Guide Panel ist jetzt Teil des nächsten Blocks --}}
 
 <script>
 function lrcTab(name, btn) {
@@ -584,16 +790,39 @@ function lrcDet(id, btn) {
 
 <div class="lrc-panel" id="lrc-panel-guide">
 
+{{-- ══ GUIDE BOX - große Box um gesamtes Handbuch ══ --}}
+<div class="lrc-guide-box">
+
 <style>
 /* ── Guide wrapper ── */
 .gd{max-width:920px;padding:0;margin:0 auto}
+
+/* ══ Guide Box (große Box um gesamtes Handbuch) ══ */
+.lrc-guide-box {
+  background: transparent;
+  padding: 0;
+}
+.lrc-solid .lrc-guide-box {
+  background: #1a2235;
+  border-radius: 0 0 14px 14px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-top: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+html.ap-light .lrc-solid .lrc-guide-box {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-top: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
 /* ── Hero ── */
 .gd-hero{padding:0 0 1rem}
 .gd-hero h2{font-family:var(--ap-font-head);font-weight:800;font-size:1.3rem;margin:0 0 .2rem;color:var(--ap-text-head)}
 .gd-hero p{color:var(--ap-muted);font-size:.87rem;margin:0}
 /* ── Card grid ── */
 .gd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.55rem;margin-bottom:1.8rem}
-.gd-c{background:var(--ap-input-bg);border:1px solid var(--ap-border);border-radius:9px;padding:.6rem .85rem;
+.gd-c{background:var(--ap-kpi-bg);border:1px solid var(--ap-border);border-radius:9px;padding:.6rem .85rem;
        text-decoration:none;display:flex;align-items:center;gap:.55rem;transition:.15s;cursor:pointer}
 .gd-c:hover{border-color:var(--ap-blue);background:rgba(59,130,246,.07);text-decoration:none}
 .gd-c.adm{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.04)}
@@ -608,7 +837,7 @@ function lrcDet(id, btn) {
 .gd-sec{margin-bottom:1.8rem;scroll-margin-top:80px}
 .gd-sec>h3{font-family:var(--ap-font-head);font-weight:800;font-size:1rem;margin:0 0 .6rem;
             display:flex;align-items:center;gap:.45rem;color:var(--ap-text-head);padding:0}
-.gd-sec-body{background:var(--ap-input-bg);border:1px solid var(--ap-border);border-radius:12px;padding:1.2rem 1.4rem}
+.gd-sec-body{background:var(--ap-kpi-bg);border:1px solid var(--ap-border);border-radius:12px;padding:1.2rem 1.4rem}
 .gd-sec-body p,.gd-sec-body li{font-size:.875rem;line-height:1.78;color:var(--ap-text);margin-top:0}
 .gd-sec-body p+p{margin-top:.6rem}
 /* ── Steps ── */
@@ -638,9 +867,10 @@ function lrcDet(id, btn) {
 .gd-code{font-family:var(--ap-font-mono);font-size:.82rem;background:rgba(0,0,0,.2);
          padding:.1rem .35rem;border-radius:4px;border:1px solid var(--ap-border);color:#f87171}
 /* ── Code block ── */
-.gd-codeblock{font-family:var(--ap-font-mono);font-size:.82rem;background:rgba(0,0,0,.3);
+.gd-codeblock{font-family:var(--ap-font-mono);font-size:.82rem;background:var(--ap-surface);
               border:1px solid var(--ap-border);border-radius:8px;padding:.8rem 1rem;
               margin:.7rem 0;overflow-x:auto;color:#a5f3fc;white-space:pre;line-height:1.6}
+html.ap-light .gd-codeblock{background:#f1f5f9;color:#0e7490;border-color:#cbd5e1}
 /* ── Admin block ── */
 .gd-admin-section{background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.3);
                   border-radius:12px;padding:1.2rem 1.4rem;margin:1.5rem 0}
@@ -653,28 +883,33 @@ function lrcDet(id, btn) {
 .gd-faq-a{font-size:.875rem;color:var(--ap-text);margin-bottom:1rem;line-height:1.75}
 </style>
 
-@if(str_starts_with(app()->getLocale(), 'en'))
-{{-- ═══════════════════════ ENGLISH ═══════════════════════ --}}
+
+{{-- ═══════════════════════════════════════════════════════════════════
+     GUIDE CONTENT - Uses language variables from Resources/lang/xx/lrc.php
+     Fallback: English if translation missing
+     ═══════════════════════════════════════════════════════════════════ --}}
+
+@php $g = 'lrc::lrc.'; @endphp
 
 <div class="gd" style="padding:1.5rem 0">
 <div class="gd-hero">
-  <h2>📋 Landing Rate Corrections – Guide</h2>
-  <p>Everything you need to know about this module · Pilot section visible to all · Admin section visible to admins only</p>
+  <h2>📋 {{ __($g.'guide_title') }}</h2>
+  <p>{{ __($g.'guide_subtitle') }}</p>
 </div>
 
 {{-- CARD GRID --}}
 <div class="gd-grid">
-  <a href="#gen-what"   class="gd-c"><span class="gd-ci">❓</span><div class="gd-ct"><div class="t">What is this?</div><div class="s">Overview</div></div></a>
-  <a href="#gen-rates"  class="gd-c"><span class="gd-ci">📊</span><div class="gd-ct"><div class="t">Landing Rates</div><div class="s">Reference table</div></div></a>
-  <a href="#gen-submit" class="gd-c"><span class="gd-ci">✏️</span><div class="gd-ct"><div class="t">Submit Request</div><div class="s">Step by step</div></div></a>
-  <a href="#gen-status" class="gd-c"><span class="gd-ci">🔄</span><div class="gd-ct"><div class="t">Request Status</div><div class="s">What each state means</div></div></a>
-  <a href="#gen-faq"    class="gd-c"><span class="gd-ci">💬</span><div class="gd-ct"><div class="t">FAQ</div><div class="s">Common questions</div></div></a>
+  <a href="#gen-what"   class="gd-c"><span class="gd-ci">❓</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_what') }}</div><div class="s">{{ __($g.'guide_nav_what_sub') }}</div></div></a>
+  <a href="#gen-rates"  class="gd-c"><span class="gd-ci">📊</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_rates') }}</div><div class="s">{{ __($g.'guide_nav_rates_sub') }}</div></div></a>
+  <a href="#gen-submit" class="gd-c"><span class="gd-ci">✏️</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_submit') }}</div><div class="s">{{ __($g.'guide_nav_submit_sub') }}</div></div></a>
+  <a href="#gen-status" class="gd-c"><span class="gd-ci">🔄</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_status') }}</div><div class="s">{{ __($g.'guide_nav_status_sub') }}</div></div></a>
+  <a href="#gen-faq"    class="gd-c"><span class="gd-ci">💬</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_faq') }}</div><div class="s">{{ __($g.'guide_nav_faq_sub') }}</div></div></a>
   @if(auth()->user()->hasRole('admin'))
-  <a href="#gen-admintabs"   class="gd-c adm"><span class="gd-ci">🧭</span><div class="gd-ct"><div class="t">Admin Tabs <span class="gd-abadge">ADMIN</span></div><div class="s">Navigation explained</div></div></a>
-  <a href="#gen-review"      class="gd-c adm"><span class="gd-ci">🔍</span><div class="gd-ct"><div class="t">Review <span class="gd-abadge">ADMIN</span></div><div class="s">How to decide</div></div></a>
-  <a href="#gen-direct"      class="gd-c adm"><span class="gd-ci">⚡</span><div class="gd-ct"><div class="t">Direct Fix <span class="gd-abadge">ADMIN</span></div><div class="s">Without pilot request</div></div></a>
-  <a href="#gen-notify"      class="gd-c adm"><span class="gd-ci">✉️</span><div class="gd-ct"><div class="t">Notifications <span class="gd-abadge">ADMIN</span></div><div class="s">Email setup</div></div></a>
-  <a href="#gen-navlinks"    class="gd-c adm"><span class="gd-ci">🔗</span><div class="gd-ct"><div class="t">Nav Links <span class="gd-abadge">ADMIN</span></div><div class="s">Frontend integration</div></div></a>
+  <a href="#gen-admintabs"   class="gd-c adm"><span class="gd-ci">🧭</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_admintabs') }} <span class="gd-abadge">ADMIN</span></div><div class="s">{{ __($g.'guide_nav_admintabs_sub') }}</div></div></a>
+  <a href="#gen-review"      class="gd-c adm"><span class="gd-ci">🔍</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_review') }} <span class="gd-abadge">ADMIN</span></div><div class="s">{{ __($g.'guide_nav_review_sub') }}</div></div></a>
+  <a href="#gen-direct"      class="gd-c adm"><span class="gd-ci">⚡</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_direct') }} <span class="gd-abadge">ADMIN</span></div><div class="s">{{ __($g.'guide_nav_direct_sub') }}</div></div></a>
+  <a href="#gen-notify"      class="gd-c adm"><span class="gd-ci">✉️</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_notify') }} <span class="gd-abadge">ADMIN</span></div><div class="s">{{ __($g.'guide_nav_notify_sub') }}</div></div></a>
+  <a href="#gen-navlinks"    class="gd-c adm"><span class="gd-ci">🔗</span><div class="gd-ct"><div class="t">{{ __($g.'guide_nav_navlinks') }} <span class="gd-abadge">ADMIN</span></div><div class="s">{{ __($g.'guide_nav_navlinks_sub') }}</div></div></a>
   @endif
 </div>
 
@@ -682,11 +917,11 @@ function lrcDet(id, btn) {
 
 {{-- SECTION: WHAT --}}
 <div class="gd-sec" id="gen-what">
-  <h3>❓ What is a Landing Rate Correction?</h3>
+  <h3>❓ {{ __($g.'guide_what_title') }}</h3>
 <div class="gd-sec-body">
-  <p>ACARS records your landing rate automatically when you touch down. Sometimes this fails – for example when your simulator crashes at the exact moment of touchdown, your internet connection drops, or ACARS has a software glitch. The result is a clearly wrong value like <strong>0 ft/min</strong> or an extreme number that couldn't be real.</p>
-  <p>This module lets you formally request a correction. You explain what happened, optionally attach a screenshot as proof, and an admin decides. If approved, your PIREP is updated with the correct value automatically.</p>
-  <div class="gd-note"><strong>Note:</strong> Only accepted PIREPs can be corrected. Draft or rejected PIREPs are not eligible.</div>
+  <p>{!! __($g.'guide_what_p1') !!}</p>
+  <p>{!! __($g.'guide_what_p2') !!}</p>
+  <div class="gd-note"><strong>{{ __('Note') }}:</strong> {{ __($g.'guide_what_note') }}</div>
 </div>
 </div>
 
@@ -694,56 +929,50 @@ function lrcDet(id, btn) {
 
 {{-- SECTION: RATES --}}
 <div class="gd-sec" id="gen-rates">
-  <h3>📊 Landing Rate Reference</h3>
+  <h3>📊 {{ __($g.'guide_rates_title') }}</h3>
 <div class="gd-sec-body">
-  <p>Use this when filling in your correction request. Enter the value that best matches what you remember from your flight:</p>
+  <p>{{ __($g.'guide_rates_intro') }}</p>
   <div class="gd-rategrid">
     <div class="gd-rb" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)">
-      <div style="font-weight:700;color:#4ade80;font-family:var(--ap-font-head);font-size:.88rem">✈ Smooth</div>
-</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-50 to -250 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Excellent landing</div>
+      <div style="font-weight:700;color:#4ade80;font-family:var(--ap-font-head);font-size:.88rem">✈ {{ __($g.'guide_rates_smooth') }}</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">{{ __($g.'guide_rates_smooth_range') }}</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">{{ __($g.'guide_rates_smooth_desc') }}</div>
     </div>
     <div class="gd-rb" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3)">
-      <div style="font-weight:700;color:#fbbf24;font-family:var(--ap-font-head);font-size:.88rem">✈ Normal</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-250 to -600 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Acceptable</div>
+      <div style="font-weight:700;color:#fbbf24;font-family:var(--ap-font-head);font-size:.88rem">✈ {{ __($g.'guide_rates_normal') }}</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">{{ __($g.'guide_rates_normal_range') }}</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">{{ __($g.'guide_rates_normal_desc') }}</div>
     </div>
     <div class="gd-rb" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)">
-      <div style="font-weight:700;color:#f87171;font-family:var(--ap-font-head);font-size:.88rem">✈ Hard</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">below -600 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Hard landing</div>
+      <div style="font-weight:700;color:#f87171;font-family:var(--ap-font-head);font-size:.88rem">✈ {{ __($g.'guide_rates_hard') }}</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">{{ __($g.'guide_rates_hard_range') }}</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">{{ __($g.'guide_rates_hard_desc') }}</div>
     </div>
     <div class="gd-rb" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3)">
-      <div style="font-weight:700;color:#a78bfa;font-family:var(--ap-font-head);font-size:.88rem">⚠ Implausible</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">0 or above -20 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Recording error likely</div>
+      <div style="font-weight:700;color:#a78bfa;font-family:var(--ap-font-head);font-size:.88rem">⚠ {{ __($g.'guide_rates_implausible') }}</div>
+      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">{{ __($g.'guide_rates_implausible_range') }}</div>
+      <div style="font-size:.75rem;color:var(--ap-muted)">{{ __($g.'guide_rates_implausible_desc') }}</div>
     </div>
   </div>
-  <div class="gd-warn">
-  <strong>⚠ Only submit if you have real proof.</strong><br><br>
-  This module is strictly for fixing technical recording errors – not for improving your landing stats. Before submitting, you need actual evidence from an external tool (flight tracker, replay tool, or a screenshot of your instruments at the moment of landing).<br><br>
-  <strong>Do not guess.</strong> "I think my landing was better" is not a valid reason. If you cannot provide proof, do not submit a request. Admins verify every claim and can access external data.<br><br>
-  Requests without sufficient evidence will be <strong>rejected and recorded in the audit log</strong>. Repeated misuse will be escalated to VA staff.
-  </div>
+  <div class="gd-warn"><strong>⚠</strong> {{ __($g.'guide_rates_warn') }}</div>
+</div>
 </div>
 
 <hr class="gd-hr">
 
 {{-- SECTION: SUBMIT --}}
 <div class="gd-sec" id="gen-submit">
-  <h3>✏️ How to Submit a Correction Request</h3>
+  <h3>✏️ {{ __($g.'guide_submit_title') }}</h3>
 <div class="gd-sec-body">
   <ol class="gd-steps">
-    <li><span class="gd-n">1</span><span>Click the <strong>Implausible</strong> tab – it shows all your PIREPs with suspicious landing rates (0 or above -20 ft/min).</span></li>
-    <li><span class="gd-n">2</span><span>Click <strong>Fix →</strong> next to the flight you want to correct.</span></li>
-    <li><span class="gd-n">3</span><span>Enter the <strong>correct landing rate</strong> – must be a negative number, e.g. <span class="gd-code">-180</span>. Use the table above as a reference.</span></li>
-    <li><span class="gd-n">4</span><span>Write a clear <strong>reason</strong> (min. 10 characters). Example: <em>"ACARS lost connection 2 sec before touchdown. Actual landing was approx. -180 ft/min."</em></span></li>
-    <li><span class="gd-n">5</span><span>Optional: attach a <strong>screenshot</strong> from your simulator or ACARS log as evidence (JPG, PNG or PDF, max 5 MB).</span></li>
-    <li><span class="gd-n">6</span><span>Check <strong>Notify me by email</strong> if you want to know when the admin decides.</span></li>
-    <li><span class="gd-n">7</span><span>Click <strong>Submit Request</strong>. The request is now pending admin review.</span></li>
+    <li><span class="gd-n">1</span>{{ __($g.'guide_submit_step1') }}</li>
+    <li><span class="gd-n">2</span>{{ __($g.'guide_submit_step2') }}</li>
+    <li><span class="gd-n">3</span>{{ __($g.'guide_submit_step3') }}</li>
+    <li><span class="gd-n">4</span>{{ __($g.'guide_submit_step4') }}</li>
+    <li><span class="gd-n">5</span>{{ __($g.'guide_submit_step5') }}</li>
+    <li><span class="gd-n">6</span>{{ __($g.'guide_submit_step6') }}</li>
   </ol>
-  <div class="gd-note"><strong>Note:</strong> Your original PIREP stays unchanged until an admin approves the request.</div>
+  <div class="gd-tip"><strong>💡 Tip:</strong> {{ __($g.'guide_submit_tip') }}</div>
 </div>
 </div>
 
@@ -751,260 +980,20 @@ function lrcDet(id, btn) {
 
 {{-- SECTION: STATUS --}}
 <div class="gd-sec" id="gen-status">
-  <h3>🔄 Request Status – What Does Each State Mean?</h3>
+  <h3>🔄 {{ __($g.'guide_status_title') }}</h3>
 <div class="gd-sec-body">
-  <p>Check the <strong>My Requests</strong> tab at any time to see the current state of your requests:</p>
   <div class="gd-statuslist">
     <div class="gd-si">
       <span class="gd-si-ico">⏳</span>
-      <div><div class="gd-si-t">Pending</div>
-</div><div class="gd-si-d">Your request has been submitted and is waiting for an admin to review it. No action needed from you.</div></div>
+      <div><div class="gd-si-t">{{ __($g.'guide_status_pending') }}</div><div class="gd-si-d">{{ __($g.'guide_status_pending_desc') }}</div></div>
     </div>
     <div class="gd-si">
-      <span class="gd-si-ico" style="color:#4ade80">✓</span>
-      <div><div class="gd-si-t">Approved</div><div class="gd-si-d">The admin approved your request. Your PIREP's landing rate has been updated to the value you requested.</div></div>
+      <span class="gd-si-ico">✅</span>
+      <div><div class="gd-si-t">{{ __($g.'guide_status_approved') }}</div><div class="gd-si-d">{{ __($g.'guide_status_approved_desc') }}</div></div>
     </div>
     <div class="gd-si">
-      <span class="gd-si-ico" style="color:#f87171">✗</span>
-      <div><div class="gd-si-t">Rejected</div><div class="gd-si-d">The admin rejected the request. The reason is shown in the Admin Decision column. You can submit a new request with better evidence.</div></div>
-    </div>
-  </div>
-</div>
-
-<hr class="gd-hr">
-
-{{-- SECTION: FAQ --}}
-<div class="gd-sec" id="gen-faq">
-  <h3>💬 Frequently Asked Questions</h3>
-<div class="gd-sec-body">
-  <p class="gd-faq-q">My flight isn't in the Implausible tab – can I still correct it?</p>
-  <p class="gd-faq-a">The Implausible tab only shows values of 0 or above -20 ft/min. If your flight doesn't appear there but the rate still seems wrong, go to <strong>My Flights</strong>, find the flight, and use the <strong>Fix →</strong> button there.</p>
-  <p class="gd-faq-q">How long does a review take?</p>
-  <p class="gd-faq-a">It depends on admin availability. Enable email notification when submitting so you're informed as soon as a decision is made.</p>
-
-  <p class="gd-faq-q">My request was approved but my PIREP still shows the old value.</p>
-  <p class="gd-faq-a" style="margin-bottom:0">Try clearing your browser cache and reloading. If the issue persists, contact an admin.</p>
-</div>
-</div>
-
-{{-- ═══════════════ ADMIN ONLY SECTIONS ═══════════════ --}}
-@if(auth()->user()->hasRole('admin'))
-
-<hr class="gd-hr">
-<div class="gd-admin-section">
-  <div class="gd-admin-header">🔒 Admin Section – only visible to admins</div>
-
-  {{-- Admin Tabs --}}
-  <div class="gd-sec" id="gen-admintabs" style="margin-bottom:1.5rem">
-    <h3>🧭 Admin Panel – All Tabs Explained</h3>
-<div class="gd-sec-body">
-    <p>Go to <a href="{{ url('/admin/lrc') }}" style="color:var(--ap-blue)">{{ url('/admin/lrc') }}</a> to access the admin panel.</p>
-  <div class="gd-tip"><strong>Tip:</strong> The admin panel is also accessible via the left sidebar in the phpVMS admin area: <strong>Addons → LR Corrections</strong>.</div>
-    <table class="gd-tbl">
-      <thead><tr><th>Tab</th><th>What you see</th><th>When to use</th></tr></thead>
-      <tbody>
-        <tr><td>⏳ <strong>Pending</strong></td><td>Open requests awaiting a decision</td><td>Your main work queue – check this daily</td></tr>
-        <tr><td>✓ <strong>Approved</strong></td><td>All approved corrections</td><td>Verify corrections were applied correctly</td></tr>
-        <tr><td>✗ <strong>Rejected</strong></td><td>Rejected requests with admin notes</td><td>Look up past rejection reasons</td></tr>
-        <tr><td>≡ <strong>All Requests</strong></td><td>Complete history all pilots</td><td>Full audit search</td></tr>
-        <tr><td>✦ <strong>Audit Log</strong></td><td>Chronological log – who decided what and when</td><td>Accountability trail</td></tr>
-        <tr><td>✉ <strong>Recipients</strong></td><td>Select which admins receive email alerts</td><td>Initial setup / when team changes</td></tr>
-        <tr><td>⚠ <strong>Implausible PIREPs</strong></td><td>All site-wide PIREPs with suspicious rates</td><td>Proactive cleanup + Direct Fix</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-  {{-- Review --}}
-  <div class="gd-sec" id="gen-review" style="margin-bottom:1.5rem">
-    <h3>🔍 How to Review a Pilot Request</h3>
-<div class="gd-sec-body">
-    <ol class="gd-steps">
-      <li><span class="gd-n">1</span><span>Go to <strong>⏳ Pending</strong> and click <strong>Review →</strong> on a request.</span></li>
-      <li><span class="gd-n">2</span><span>Check the flight details: original rate, requested rate, submission time.</span></li>
-      <li><span class="gd-n">3</span><span>Read the pilot's reason and view attached evidence if any.</span></li>
-      <li><span class="gd-n">4</span><span>Enter an <strong>Admin Note</strong> – optional for approval, <strong>required</strong> for rejection.</span></li>
-      <li><span class="gd-n">5</span><span>Click <strong>Approve</strong> or <strong>Reject</strong>. The PIREP updates immediately on approval.</span></li>
-    </ol>
-    <div class="gd-warn"><strong>Note:</strong> Decisions cannot be undone via the module. Contact a developer if a reversal is needed.</div>
-</div>
-    <div class="gd-tip"><strong>Tip:</strong> Always write a clear rejection reason – pilots need to know what evidence was missing.</div>
-  </div>
-
-  {{-- Direct Fix --}}
-  <div class="gd-sec" id="gen-direct" style="margin-bottom:1.5rem">
-    <h3>⚡ Direct Fix – Correct Without a Pilot Request</h3>
-<div class="gd-sec-body">
-    <p>In <strong>⚠ Implausible PIREPs</strong> each row has a <strong>Direct Fix</strong> form. This lets you correct a landing rate immediately, bypassing the request workflow.</p>
-    <div class="gd-warn"><strong>Use with caution:</strong> No audit entry is created on the pilot's side. Only use when you're certain the value is wrong (e.g. clear ACARS 0 ft/min).</div>
-</div>
-  </div>
-
-  {{-- Notifications --}}
-  <div class="gd-sec" id="gen-notify" style="margin-bottom:1.5rem">
-    <h3>✉️ Email Notifications Setup</h3>
-<div class="gd-sec-body">
-    <p>Go to <strong>✉ Recipients</strong> in the admin panel and check the box next to each admin who should receive an email when a pilot submits a new request.</p>
-    <div class="gd-warn"><strong>Important:</strong> If no recipients are configured, no emails are sent at all. Always have at least one admin selected.</div>
-</div>
-    <div class="gd-tip"><strong>Tip:</strong> Only users with the <em>admin</em> role appear in this list. If someone is missing, check their role under Config → Roles.</div>
-  </div>
-
-  {{-- Frontend Navigation Links --}}
-  <div class="gd-sec" id="gen-navlinks" style="margin-bottom:0">
-    <h3>🔗 Frontend Navigation – How to Link This Module</h3>
-<div class="gd-sec-body">
-    <p>To make this module accessible for pilots, add a link in your theme's navigation. Here's how:</p>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 1 – Simple link in your nav blade template:</p>
-    <div class="gd-codeblock">&lt;a href="@{{ url('/lrc') }}"&gt;Landing Rate Corrections&lt;/a&gt;</div>
-</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 2 – Using the named route:</p>
-    <div class="gd-codeblock">&lt;a href="@{{ route('lrc.pilot.index') }}"&gt;Landing Rate Corrections&lt;/a&gt;</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 3 – Link directly to a specific tab:</p>
-    <div class="gd-codeblock">&lt;!-- Goes to the Implausible tab --&gt;
-&lt;a href="@{{ url('/lrc#imp') }}"&gt;Implausible Landings&lt;/a&gt;
-
-&lt;!-- Goes to My Requests tab --&gt;
-&lt;a href="@{{ url('/lrc#audit') }}"&gt;My Requests&lt;/a&gt;
-
-&lt;!-- Goes to the Guide tab --&gt;
-&lt;a href="@{{ url('/lrc#guide') }}"&gt;LRC Guide&lt;/a&gt;</div>
-
-    <div class="gd-note"><strong>Where to add the link:</strong> In phpVMS 7 with a custom theme, find your theme's navigation file – typically <span class="gd-code">resources/views/layouts/nav.blade.php</span> or similar. Add the link inside the authenticated user block (<span class="gd-code">@auth ... @endauth</span>) so guests don't see it.</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem;margin-top:1rem">All module URLs at a glance:</p>
-    <table class="gd-tbl">
-      <thead><tr><th>Who</th><th>URL</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td>Pilot</td><td><span class="gd-code">{{ url('/lrc') }}</span></td><td>Pilot dashboard</td></tr>
-        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc') }}</span></td><td>Admin panel – all request management</td></tr>
-        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc/implausible') }}</span></td><td>All implausible PIREPs + Direct Fix</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-</div>{{-- gd-admin-section --}}
-@endif {{-- isAdmin --}}
-
-</div>{{-- gd-body --}}
-</div>{{-- gd --}}
-
-@elseif(str_starts_with(app()->getLocale(), 'fr'))
-{{-- ═══════════════════════ FRANÇAIS ═══════════════════════ --}}
-
-<div class="gd" style="padding:1.5rem 0">
-<div class="gd-hero">
-  <h2>📋 Corrections de Taux d'Atterrissage – Guide</h2>
-  <p>Tout ce que vous devez savoir sur ce module · Section pilote visible par tous · Section admin visible uniquement aux admins</p>
-</div>
-
-{{-- CARD GRID --}}
-<div class="gd-grid">
-  <a href="#fr-what"   class="gd-c"><span class="gd-ci">❓</span><div class="gd-ct"><div class="t">C'est quoi ?</div><div class="s">Aperçu</div></div></a>
-  <a href="#fr-rates"  class="gd-c"><span class="gd-ci">📊</span><div class="gd-ct"><div class="t">Taux d'Atterrissage</div><div class="s">Tableau de référence</div></div></a>
-  <a href="#fr-submit" class="gd-c"><span class="gd-ci">✏️</span><div class="gd-ct"><div class="t">Soumettre</div><div class="s">Étape par étape</div></div></a>
-  <a href="#fr-status" class="gd-c"><span class="gd-ci">🔄</span><div class="gd-ct"><div class="t">Statut</div><div class="s">Que signifie chaque état</div></div></a>
-  <a href="#fr-faq"    class="gd-c"><span class="gd-ci">💬</span><div class="gd-ct"><div class="t">FAQ</div><div class="s">Questions fréquentes</div></div></a>
-  @if(auth()->user()->hasRole('admin'))
-  <a href="#fr-admintabs"   class="gd-c adm"><span class="gd-ci">🧭</span><div class="gd-ct"><div class="t">Onglets Admin <span class="gd-abadge">ADMIN</span></div><div class="s">Navigation expliquée</div></div></a>
-  <a href="#fr-review"      class="gd-c adm"><span class="gd-ci">🔍</span><div class="gd-ct"><div class="t">Révision <span class="gd-abadge">ADMIN</span></div><div class="s">Comment décider</div></div></a>
-  <a href="#fr-direct"      class="gd-c adm"><span class="gd-ci">⚡</span><div class="gd-ct"><div class="t">Correction directe <span class="gd-abadge">ADMIN</span></div><div class="s">Sans demande pilote</div></div></a>
-  <a href="#fr-notify"      class="gd-c adm"><span class="gd-ci">✉️</span><div class="gd-ct"><div class="t">Notifications <span class="gd-abadge">ADMIN</span></div><div class="s">Configuration email</div></div></a>
-  <a href="#fr-navlinks"    class="gd-c adm"><span class="gd-ci">🔗</span><div class="gd-ct"><div class="t">Liens Nav <span class="gd-abadge">ADMIN</span></div><div class="s">Intégration frontend</div></div></a>
-  @endif
-</div>
-
-<div class="gd-body">
-
-{{-- SECTION: WHAT --}}
-<div class="gd-sec" id="fr-what">
-  <h3>❓ Qu'est-ce qu'une Correction de Taux d'Atterrissage ?</h3>
-<div class="gd-sec-body">
-  <p>ACARS enregistre automatiquement votre taux d'atterrissage au moment du toucher des roues. Parfois, cette opération échoue – par exemple quand votre simulateur plante au moment précis de l'atterrissage, que votre connexion internet se coupe, ou qu'ACARS rencontre un bug logiciel. Le résultat est une valeur clairement erronée comme <strong>0 ft/min</strong> ou un chiffre extrême qui ne peut pas être réel.</p>
-  <p>Ce module vous permet de demander formellement une correction. Vous expliquez ce qui s'est passé, joignez éventuellement une capture d'écran comme preuve, et un admin décide. Si la demande est approuvée, votre PIREP est mis à jour automatiquement avec la valeur correcte.</p>
-  <div class="gd-note"><strong>Note :</strong> Seuls les PIREPs acceptés peuvent être corrigés. Les PIREPs en brouillon ou refusés ne sont pas éligibles.</div>
-</div>
-</div>
-
-<hr class="gd-hr">
-
-{{-- SECTION: RATES --}}
-<div class="gd-sec" id="fr-rates">
-  <h3>📊 Référence des Taux d'Atterrissage</h3>
-<div class="gd-sec-body">
-  <p>Utilisez ce tableau pour remplir votre demande de correction. Entrez la valeur qui correspond le mieux à ce que vous vous rappelez de votre vol :</p>
-  <div class="gd-rategrid">
-    <div class="gd-rb" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)">
-      <div style="font-weight:700;color:#4ade80;font-family:var(--ap-font-head);font-size:.88rem">✈ Doux</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-50 à -250 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Excellent atterrissage</div>
-    </div>
-    <div class="gd-rb" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3)">
-      <div style="font-weight:700;color:#fbbf24;font-family:var(--ap-font-head);font-size:.88rem">✈ Normal</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-250 à -600 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Acceptable</div>
-    </div>
-    <div class="gd-rb" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)">
-      <div style="font-weight:700;color:#f87171;font-family:var(--ap-font-head);font-size:.88rem">✈ Dur</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">en dessous de -600 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Atterrissage dur</div>
-    </div>
-    <div class="gd-rb" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3)">
-      <div style="font-weight:700;color:#a78bfa;font-family:var(--ap-font-head);font-size:.88rem">⚠ Implausible</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">0 ou supérieur à -20 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Erreur d'enregistrement probable</div>
-    </div>
-  </div>
-  <div class="gd-warn">
-  <strong>⚠ Ne soumettez une demande que si vous avez une preuve réelle.</strong><br><br>
-  Ce module est strictement destiné à corriger des erreurs techniques d'enregistrement – pas à améliorer vos statistiques d'atterrissage. Avant de soumettre, vous avez besoin d'une preuve concrète provenant d'un outil externe (flight tracker, outil de replay, ou capture d'écran de vos instruments au moment de l'atterrissage).<br><br>
-  <strong>Ne devinez pas.</strong> « Je pense que mon atterrissage était meilleur » n'est pas une raison valable. Si vous ne pouvez pas fournir de preuve, ne soumettez pas de demande. Les admins vérifient chaque affirmation et peuvent accéder à des données externes.<br><br>
-  Les demandes sans preuve suffisante seront <strong>refusées et enregistrées dans le journal d'audit</strong>. Les abus répétés seront signalés au personnel de la VA.
-  </div>
-</div>
-</div>
-
-<hr class="gd-hr">
-
-{{-- SECTION: SUBMIT --}}
-<div class="gd-sec" id="fr-submit">
-  <h3>✏️ Comment Soumettre une Demande de Correction</h3>
-<div class="gd-sec-body">
-  <ol class="gd-steps">
-    <li><span class="gd-n">1</span><span>Cliquez sur l'onglet <strong>Implausible</strong> – il affiche tous vos PIREPs avec des taux d'atterrissage suspects (0 ou supérieur à -20 ft/min).</span></li>
-    <li><span class="gd-n">2</span><span>Cliquez sur <strong>Corriger →</strong> à côté du vol que vous souhaitez corriger.</span></li>
-    <li><span class="gd-n">3</span><span>Entrez le <strong>taux d'atterrissage correct</strong> – doit être un nombre négatif, ex. <span class="gd-code">-180</span>. Utilisez le tableau ci-dessus comme référence.</span></li>
-    <li><span class="gd-n">4</span><span>Rédigez une <strong>raison</strong> claire (min. 10 caractères). Exemple : <em>« ACARS a perdu la connexion 2 secondes avant le toucher. L'atterrissage réel était d'environ -180 ft/min. »</em></span></li>
-    <li><span class="gd-n">5</span><span>Optionnel : joignez une <strong>capture d'écran</strong> de votre simulateur ou du journal ACARS comme preuve (JPG, PNG ou PDF, max 5 Mo).</span></li>
-    <li><span class="gd-n">6</span><span>Cochez <strong>Me notifier par email</strong> si vous souhaitez être informé quand l'admin prend sa décision.</span></li>
-    <li><span class="gd-n">7</span><span>Cliquez sur <strong>Soumettre la demande</strong>. La demande est maintenant en attente de révision par un admin.</span></li>
-  </ol>
-  <div class="gd-note"><strong>Note :</strong> Votre PIREP original reste inchangé jusqu'à ce qu'un admin approuve la demande.</div>
-</div>
-</div>
-
-<hr class="gd-hr">
-
-{{-- SECTION: STATUS --}}
-<div class="gd-sec" id="fr-status">
-  <h3>🔄 Statut de la Demande – Que Signifie Chaque État ?</h3>
-<div class="gd-sec-body">
-  <p>Consultez l'onglet <strong>Mes Demandes</strong> à tout moment pour voir l'état actuel de vos demandes :</p>
-  <div class="gd-statuslist">
-    <div class="gd-si">
-      <span class="gd-si-ico">⏳</span>
-      <div><div class="gd-si-t">En attente</div><div class="gd-si-d">Votre demande a été soumise et attend qu'un admin la révise. Aucune action requise de votre part.</div></div>
-    </div>
-    <div class="gd-si">
-      <span class="gd-si-ico" style="color:#4ade80">✓</span>
-      <div><div class="gd-si-t">Approuvé</div><div class="gd-si-d">L'admin a approuvé votre demande. Le taux d'atterrissage de votre PIREP a été mis à jour avec la valeur que vous aviez demandée.</div></div>
-    </div>
-    <div class="gd-si">
-      <span class="gd-si-ico" style="color:#f87171">✗</span>
-      <div><div class="gd-si-t">Refusé</div><div class="gd-si-d">L'admin a refusé la demande. La raison est indiquée dans la colonne Décision Admin. Vous pouvez soumettre une nouvelle demande avec de meilleures preuves.</div></div>
+      <span class="gd-si-ico">❌</span>
+      <div><div class="gd-si-t">{{ __($g.'guide_status_rejected') }}</div><div class="gd-si-d">{{ __($g.'guide_status_rejected_desc') }}</div></div>
     </div>
   </div>
 </div>
@@ -1013,344 +1002,112 @@ function lrcDet(id, btn) {
 <hr class="gd-hr">
 
 {{-- SECTION: FAQ --}}
-<div class="gd-sec" id="fr-faq">
-  <h3>💬 Questions Fréquentes</h3>
+<div class="gd-sec" id="gen-faq">
+  <h3>💬 {{ __($g.'guide_faq_title') }}</h3>
 <div class="gd-sec-body">
-  <p class="gd-faq-q">Mon vol n'apparaît pas dans l'onglet Implausible – puis-je quand même le corriger ?</p>
-  <p class="gd-faq-a">L'onglet Implausible n'affiche que les valeurs de 0 ou supérieures à -20 ft/min. Si votre vol n'y apparaît pas mais que le taux semble incorrect, allez dans <strong>Mes Vols</strong>, trouvez le vol et utilisez le bouton <strong>Corriger →</strong>.</p>
-
-  <p class="gd-faq-q">Combien de temps dure une révision ?</p>
-  <p class="gd-faq-a">Cela dépend de la disponibilité des admins. Activez la notification par email lors de la soumission pour être informé dès qu'une décision est prise.</p>
-
-  <p class="gd-faq-q">Ma demande a été approuvée mais mon PIREP affiche toujours l'ancienne valeur.</p>
-  <p class="gd-faq-a" style="margin-bottom:0">Essayez de vider le cache de votre navigateur et de recharger la page. Si le problème persiste, contactez un admin.</p>
+  <div class="gd-faq-q">{{ __($g.'guide_faq_q1') }}</div>
+  <div class="gd-faq-a">{{ __($g.'guide_faq_a1') }}</div>
+  <div class="gd-faq-q">{{ __($g.'guide_faq_q2') }}</div>
+  <div class="gd-faq-a">{{ __($g.'guide_faq_a2') }}</div>
+  <div class="gd-faq-q">{{ __($g.'guide_faq_q3') }}</div>
+  <div class="gd-faq-a">{{ __($g.'guide_faq_a3') }}</div>
+  <div class="gd-faq-q">{{ __($g.'guide_faq_q4') }}</div>
+  <div class="gd-faq-a">{{ __($g.'guide_faq_a4') }}</div>
 </div>
 </div>
 
-{{-- ═══════════════ ADMIN ONLY SECTIONS ═══════════════ --}}
+{{-- ═══════════════════════════════════════════════════════════════════
+     ADMIN SECTIONS - Only visible to admins
+     ═══════════════════════════════════════════════════════════════════ --}}
 @if(auth()->user()->hasRole('admin'))
-
-<hr class="gd-hr">
 <div class="gd-admin-section">
-  <div class="gd-admin-header">🔒 Section Admin – visible uniquement aux admins</div>
+<div class="gd-admin-header">🔐 {{ __($g.'guide_admin_only') }}</div>
 
-  {{-- Admin Tabs --}}
-  <div class="gd-sec" id="fr-admintabs" style="margin-bottom:1.5rem">
-    <h3>🧭 Panneau Admin – Tous les Onglets Expliqués</h3>
+{{-- ADMIN TABS --}}
+<div class="gd-sec" id="gen-admintabs">
+  <h3>🧭 {{ __($g.'guide_admintabs_title') }}</h3>
 <div class="gd-sec-body">
-    <p>Accédez au panneau admin sur <a href="{{ url('/admin/lrc') }}" style="color:var(--ap-blue)">{{ url('/admin/lrc') }}</a>.</p>
-    <div class="gd-tip"><strong>Astuce :</strong> Le panneau admin est également accessible via la barre latérale gauche dans la zone admin de phpVMS : <strong>Addons → LR Corrections</strong>.</div>
-    <table class="gd-tbl">
-      <thead><tr><th>Onglet</th><th>Ce que vous voyez</th><th>Quand l'utiliser</th></tr></thead>
-      <tbody>
-        <tr><td>⏳ <strong>En attente</strong></td><td>Demandes ouvertes en attente de décision</td><td>File de travail principale – vérifier quotidiennement</td></tr>
-        <tr><td>✓ <strong>Approuvés</strong></td><td>Toutes les corrections approuvées</td><td>Vérifier que les corrections ont été appliquées</td></tr>
-        <tr><td>✗ <strong>Refusés</strong></td><td>Demandes refusées avec notes admin</td><td>Retrouver les raisons de refus passées</td></tr>
-        <tr><td>≡ <strong>Toutes les demandes</strong></td><td>Historique complet tous pilotes</td><td>Recherche d'audit complète</td></tr>
-        <tr><td>✦ <strong>Journal d'audit</strong></td><td>Journal chronologique – qui a décidé quoi et quand</td><td>Traçabilité des responsabilités</td></tr>
-        <tr><td>✉ <strong>Destinataires</strong></td><td>Sélectionner quels admins reçoivent les alertes email</td><td>Configuration initiale / changement d'équipe</td></tr>
-        <tr><td>⚠ <strong>PIREPs Implausibles</strong></td><td>Tous les PIREPs du site avec des taux suspects</td><td>Nettoyage proactif + Correction directe</td></tr>
-      </tbody>
-    </table>
-</div>
-  </div>
-
-  {{-- Review --}}
-  <div class="gd-sec" id="fr-review" style="margin-bottom:1.5rem">
-    <h3>🔍 Comment Réviser une Demande Pilote</h3>
-<div class="gd-sec-body">
-    <ol class="gd-steps">
-      <li><span class="gd-n">1</span><span>Allez dans <strong>⏳ En attente</strong> et cliquez sur <strong>Réviser →</strong> pour une demande.</span></li>
-      <li><span class="gd-n">2</span><span>Vérifiez les détails du vol : taux original, taux demandé, heure de soumission.</span></li>
-      <li><span class="gd-n">3</span><span>Lisez la raison du pilote et consultez les preuves jointes le cas échéant.</span></li>
-      <li><span class="gd-n">4</span><span>Entrez une <strong>Note Admin</strong> – optionnelle pour l'approbation, <strong>obligatoire</strong> pour le refus.</span></li>
-      <li><span class="gd-n">5</span><span>Cliquez sur <strong>Approuver</strong> ou <strong>Refuser</strong>. Le PIREP est mis à jour immédiatement en cas d'approbation.</span></li>
-    </ol>
-    <div class="gd-warn"><strong>Note :</strong> Les décisions ne peuvent pas être annulées via le module. Contactez un développeur si une annulation est nécessaire.</div>
-    <div class="gd-tip"><strong>Astuce :</strong> Rédigez toujours une raison de refus claire – les pilotes ont besoin de savoir quelle preuve manquait.</div>
-</div>
-  </div>
-
-  {{-- Direct Fix --}}
-  <div class="gd-sec" id="fr-direct" style="margin-bottom:1.5rem">
-    <h3>⚡ Correction Directe – Corriger Sans Demande Pilote</h3>
-<div class="gd-sec-body">
-    <p>Dans <strong>⚠ PIREPs Implausibles</strong>, chaque ligne dispose d'un formulaire de <strong>Correction directe</strong>. Cela vous permet de corriger immédiatement un taux d'atterrissage, en contournant le processus de demande.</p>
-    <div class="gd-warn"><strong>À utiliser avec précaution :</strong> Aucune entrée d'audit n'est créée du côté du pilote. N'utilisez ceci que lorsque vous êtes certain que la valeur est erronée (ex. : ACARS clair à 0 ft/min).</div>
-</div>
-  </div>
-
-  {{-- Notifications --}}
-  <div class="gd-sec" id="fr-notify" style="margin-bottom:1.5rem">
-    <h3>✉️ Configuration des Notifications Email</h3>
-<div class="gd-sec-body">
-    <p>Allez dans <strong>✉ Destinataires</strong> dans le panneau admin et cochez la case à côté de chaque admin qui doit recevoir un email quand un pilote soumet une nouvelle demande.</p>
-    <div class="gd-warn"><strong>Important :</strong> Si aucun destinataire n'est configuré, aucun email n'est envoyé. Ayez toujours au moins un admin sélectionné.</div>
-    <div class="gd-tip"><strong>Astuce :</strong> Seuls les utilisateurs avec le rôle <em>admin</em> apparaissent dans cette liste. Si quelqu'un est absent, vérifiez son rôle dans Config → Roles.</div>
-</div>
-  </div>
-
-  {{-- Frontend Navigation Links --}}
-  <div class="gd-sec" id="fr-navlinks" style="margin-bottom:0">
-    <h3>🔗 Navigation Frontend – Comment Lier ce Module</h3>
-<div class="gd-sec-body">
-    <p>Pour rendre ce module accessible aux pilotes, ajoutez un lien dans la navigation de votre thème :</p>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 1 – Lien simple dans votre template de navigation :</p>
-    <div class="gd-codeblock">&lt;a href="@{{ url('/lrc') }}"&gt;Corrections de Taux d'Atterrissage&lt;/a&gt;</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 2 – Avec la route nommée :</p>
-    <div class="gd-codeblock">&lt;a href="@{{ route('lrc.pilot.index') }}"&gt;Corrections de Taux d'Atterrissage&lt;/a&gt;</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 3 – Lien direct vers un onglet spécifique :</p>
-    <div class="gd-codeblock">&lt;!-- Vers l'onglet Implausible --&gt;
-&lt;a href="@{{ url('/lrc#imp') }}"&gt;Atterrissages Implausibles&lt;/a&gt;
-
-&lt;!-- Vers l'onglet Mes Demandes --&gt;
-&lt;a href="@{{ url('/lrc#audit') }}"&gt;Mes Demandes&lt;/a&gt;
-
-&lt;!-- Vers l'onglet Guide --&gt;
-&lt;a href="@{{ url('/lrc#guide') }}"&gt;Guide LRC&lt;/a&gt;</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem;margin-top:1rem">Toutes les URLs du module :</p>
-    <table class="gd-tbl">
-      <thead><tr><th>Qui</th><th>URL</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td>Pilote</td><td><span class="gd-code">{{ url('/lrc') }}</span></td><td>Tableau de bord pilote</td></tr>
-        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc') }}</span></td><td>Panneau admin – gestion des demandes</td></tr>
-        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc/implausible') }}</span></td><td>PIREPs implausibles + Correction directe</td></tr>
-      </tbody>
-    </table>
-</div>
-  </div>
-
-</div>{{-- gd-admin-section --}}
-@endif {{-- isAdmin --}}
-
-</div>{{-- gd-body --}}
-</div>{{-- gd --}}
-
-@else
-{{-- ═══════════════════════ DEUTSCH ═══════════════════════ --}}
-
-<div class="gd" style="padding:1.5rem 0">
-<div class="gd-hero">
-  <h2>📋 Landeratenkorrekturen – Handbuch</h2>
-  <p>Alles was du wissen musst · Pilotenbereich für alle · Admin-Bereich nur für Admins sichtbar</p>
-</div>
-
-<div class="gd-grid">
-  <a href="#gde-what"   class="gd-c"><span class="gd-ci">❓</span><div class="gd-ct"><div class="t">Was ist das?</div><div class="s">Überblick</div></div></a>
-  <a href="#gde-rates"  class="gd-c"><span class="gd-ci">📊</span><div class="gd-ct"><div class="t">Landeraten</div><div class="s">Referenztabelle</div></div></a>
-  <a href="#gde-submit" class="gd-c"><span class="gd-ci">✏️</span><div class="gd-ct"><div class="t">Antrag stellen</div><div class="s">Schritt für Schritt</div></div></a>
-  <a href="#gde-status" class="gd-c"><span class="gd-ci">🔄</span><div class="gd-ct"><div class="t">Antragsstatus</div><div class="s">Was jeder Status bedeutet</div></div></a>
-  <a href="#gde-faq"    class="gd-c"><span class="gd-ci">💬</span><div class="gd-ct"><div class="t">FAQ</div><div class="s">Häufige Fragen</div></div></a>
-  @if(auth()->user()->hasRole('admin'))
-  <a href="#gde-admintabs"  class="gd-c adm"><span class="gd-ci">🧭</span><div class="gd-ct"><div class="t">Admin-Tabs <span class="gd-abadge">ADMIN</span></div><div class="s">Navigation erklärt</div></div></a>
-  <a href="#gde-review"     class="gd-c adm"><span class="gd-ci">🔍</span><div class="gd-ct"><div class="t">Prüfen <span class="gd-abadge">ADMIN</span></div><div class="s">Wie entscheiden</div></div></a>
-  <a href="#gde-direct"     class="gd-c adm"><span class="gd-ci">⚡</span><div class="gd-ct"><div class="t">Direktkorrektur <span class="gd-abadge">ADMIN</span></div><div class="s">Ohne Pilotenantrag</div></div></a>
-  <a href="#gde-notify"     class="gd-c adm"><span class="gd-ci">✉️</span><div class="gd-ct"><div class="t">Benachrichtigungen <span class="gd-abadge">ADMIN</span></div><div class="s">E-Mail-Setup</div></div></a>
-  <a href="#gde-navlinks"   class="gd-c adm"><span class="gd-ci">🔗</span><div class="gd-ct"><div class="t">Nav-Links <span class="gd-abadge">ADMIN</span></div><div class="s">Frontend einbinden</div></div></a>
-  @endif
-</div>
-
-<div class="gd-body">
-
-<div class="gd-sec" id="gde-what">
-  <h3>❓ Was ist eine Landeratenkorrektur?</h3>
-<div class="gd-sec-body">
-  <p>ACARS zeichnet deine Landerate automatisch beim Aufsetzen auf. Manchmal schlägt das fehl – wenn der Simulator genau beim Touchdown abstürzt, die Internetverbindung abbricht oder ACARS einen Software-Fehler hat. Das Ergebnis ist ein offensichtlich falscher Wert wie <strong>0 ft/min</strong>.</p>
-  <p>Dieses Modul gibt dir die Möglichkeit, eine Korrektur formal zu beantragen. Du erklärst was passiert ist, kannst optional einen Screenshot anhängen, und ein Admin entscheidet. Bei Genehmigung wird dein PIREP automatisch aktualisiert.</p>
-  <div class="gd-note"><strong>Hinweis:</strong> Nur akzeptierte PIREPs können korrigiert werden. Entwürfe oder abgelehnte PIREPs sind nicht berechtigt.</div>
+  <p>{{ __($g.'guide_admintabs_intro') }}</p>
+  <table class="gd-tbl">
+    <thead><tr><th>Tab</th><th>{{ __($g.'guide_navlinks_tbl_desc') }}</th></tr></thead>
+    <tbody>
+      <tr><td><strong>{{ __($g.'guide_admintabs_requests') }}</strong></td><td>{{ __($g.'guide_admintabs_requests_desc') }}</td></tr>
+      <tr><td><strong>{{ __($g.'guide_admintabs_history') }}</strong></td><td>{{ __($g.'guide_admintabs_history_desc') }}</td></tr>
+      <tr><td><strong>{{ __($g.'guide_admintabs_implausible') }}</strong></td><td>{{ __($g.'guide_admintabs_implausible_desc') }}</td></tr>
+      <tr><td><strong>{{ __($g.'guide_admintabs_notifications') }}</strong></td><td>{{ __($g.'guide_admintabs_notifications_desc') }}</td></tr>
+      <tr><td><strong>{{ __($g.'guide_admintabs_appearance') }}</strong></td><td>{{ __($g.'guide_admintabs_appearance_desc') }}</td></tr>
+    </tbody>
+  </table>
 </div>
 </div>
 
 <hr class="gd-hr">
 
-<div class="gd-sec" id="gde-rates">
-  <h3>📊 Landeraten-Referenz</h3>
+{{-- REVIEW --}}
+<div class="gd-sec" id="gen-review">
+  <h3>🔍 {{ __($g.'guide_review_title') }}</h3>
 <div class="gd-sec-body">
-  <p>Nutze diese Übersicht wenn du deinen Korrekturwert eingibst:</p>
-  <div class="gd-rategrid">
-    <div class="gd-rb" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3)">
-      <div style="font-weight:700;color:#4ade80;font-family:var(--ap-font-head);font-size:.88rem">✈ Sanft</div>
+  <p>{{ __($g.'guide_review_intro') }}</p>
+  <ul style="margin:.5rem 0;padding-left:1.2rem">
+    <li>{{ __($g.'guide_review_check1') }}</li>
+    <li>{{ __($g.'guide_review_check2') }}</li>
+    <li>{{ __($g.'guide_review_check3') }}</li>
+    <li>{{ __($g.'guide_review_check4') }}</li>
+  </ul>
+  <div class="gd-tip"><strong>💡</strong> {{ __($g.'guide_review_tip') }}</div>
 </div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-50 bis -250 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Ausgezeichnete Landung</div>
-    </div>
-    <div class="gd-rb" style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3)">
-      <div style="font-weight:700;color:#fbbf24;font-family:var(--ap-font-head);font-size:.88rem">✈ Normal</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">-250 bis -600 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Akzeptabel</div>
-    </div>
-    <div class="gd-rb" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3)">
-      <div style="font-weight:700;color:#f87171;font-family:var(--ap-font-head);font-size:.88rem">✈ Hart</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">unter -600 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Harte Landung</div>
-    </div>
-    <div class="gd-rb" style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3)">
-      <div style="font-weight:700;color:#a78bfa;font-family:var(--ap-font-head);font-size:.88rem">⚠ Unplausibel</div>
-      <div style="font-family:var(--ap-font-mono);font-size:.8rem;margin:.2rem 0;color:var(--ap-text)">0 oder über -20 ft/min</div>
-      <div style="font-size:.75rem;color:var(--ap-muted)">Wahrscheinlich Fehler</div>
-    </div>
-  </div>
-  <div class="gd-warn">
-  <strong>⚠ Nur einreichen wenn du echten Nachweis hast.</strong><br><br>
-  Dieses Modul dient ausschließlich zur Korrektur technischer Aufzeichnungsfehler – nicht um deine Landestatistik zu verbessern. Vor dem Einreichen brauchst du einen tatsächlichen Nachweis aus einem externen Tool (Flight-Tracker, Replay-Tool oder ein Screenshot deiner Instrumente im Moment der Landung).<br><br>
-  <strong>Nicht raten.</strong> „Ich glaube meine Landung war besser" ist kein gültiger Grund. Wenn du keinen Nachweis vorweisen kannst, stell keinen Antrag. Admins prüfen jeden Antrag und können externe Daten einsehen.<br><br>
-  Anträge ohne ausreichenden Nachweis werden <strong>abgelehnt und im Audit-Log erfasst</strong>. Wiederholter Missbrauch wird an das VA-Personal weitergeleitet.
-  </div>
 </div>
 
 <hr class="gd-hr">
 
-<div class="gd-sec" id="gde-submit">
-  <h3>✏️ Wie stelle ich einen Korrekturantrag?</h3>
+{{-- DIRECT FIX --}}
+<div class="gd-sec" id="gen-direct">
+  <h3>⚡ {{ __($g.'guide_direct_title') }}</h3>
 <div class="gd-sec-body">
+  <p>{{ __($g.'guide_direct_intro') }}</p>
   <ol class="gd-steps">
-    <li><span class="gd-n">1</span><span>Klicke auf den Tab <strong>Unplausibel</strong> – dort siehst du alle deine PIREPs mit verdächtigen Landeraten.</span></li>
-    <li><span class="gd-n">2</span><span>Klicke auf <strong>Korrigieren →</strong> beim betreffenden Flug.</span></li>
-    <li><span class="gd-n">3</span><span>Gib die <strong>korrekte Landerate</strong> ein – muss negativ sein, z.B. <span class="gd-code">-180</span>. Nutze die Tabelle oben als Orientierung.</span></li>
-    <li><span class="gd-n">4</span><span>Schreibe eine klare <strong>Begründung</strong> (min. 10 Zeichen). Beispiel: <em>„ACARS hat 2 Sekunden vor dem Touchdown die Verbindung verloren. Echte Landerate ca. -180 ft/min."</em></span></li>
-    <li><span class="gd-n">5</span><span>Optional: Füge einen <strong>Screenshot</strong> als Nachweis bei (JPG, PNG oder PDF, max. 5 MB).</span></li>
-    <li><span class="gd-n">6</span><span>Setze das Häkchen bei <strong>Per E-Mail benachrichtigen</strong> wenn du informiert werden möchtest.</span></li>
-    <li><span class="gd-n">7</span><span>Klicke <strong>Antrag einreichen</strong>. Der Antrag wartet jetzt auf Admin-Prüfung.</span></li>
+    <li><span class="gd-n">1</span>{{ __($g.'guide_direct_step1') }}</li>
+    <li><span class="gd-n">2</span>{{ __($g.'guide_direct_step2') }}</li>
+    <li><span class="gd-n">3</span>{{ __($g.'guide_direct_step3') }}</li>
+    <li><span class="gd-n">4</span>{{ __($g.'guide_direct_step4') }}</li>
   </ol>
-  <div class="gd-note"><strong>Hinweis:</strong> Dein originaler PIREP bleibt unverändert bis ein Admin den Antrag genehmigt.</div>
+  <div class="gd-note"><strong>ℹ️</strong> {{ __($g.'guide_direct_note') }}</div>
 </div>
 </div>
 
 <hr class="gd-hr">
 
-<div class="gd-sec" id="gde-status">
-  <h3>🔄 Antragsstatus – Was bedeutet was?</h3>
+{{-- NOTIFICATIONS --}}
+<div class="gd-sec" id="gen-notify">
+  <h3>✉️ {{ __($g.'guide_notify_title') }}</h3>
 <div class="gd-sec-body">
-  <p>Im Tab <strong>Meine Anträge</strong> siehst du den aktuellen Stand aller deiner Anträge:</p>
-  <div class="gd-statuslist">
-    <div class="gd-si">
-      <span class="gd-si-ico">⏳</span>
-      <div><div class="gd-si-t">Ausstehend</div>
-</div><div class="gd-si-d">Dein Antrag wurde eingereicht und wartet auf Admin-Prüfung. Du musst nichts weiter tun.</div></div>
-    </div>
-    <div class="gd-si">
-      <span class="gd-si-ico" style="color:#4ade80">✓</span>
-      <div><div class="gd-si-t">Genehmigt</div><div class="gd-si-d">Der Admin hat genehmigt. Die Landerate deines PIREPs wurde auf den beantragten Wert aktualisiert.</div></div>
-    </div>
-    <div class="gd-si">
-      <span class="gd-si-ico" style="color:#f87171">✗</span>
-      <div><div class="gd-si-t">Abgelehnt</div><div class="gd-si-d">Abgelehnt. Den Grund siehst du in der Spalte „Admin-Entscheid". Du kannst einen neuen Antrag mit besserem Nachweis stellen.</div></div>
-    </div>
-  </div>
+  <p>{{ __($g.'guide_notify_intro') }}</p>
+  <ul style="margin:.5rem 0;padding-left:1.2rem">
+    <li>{{ __($g.'guide_notify_event1') }}</li>
+    <li>{{ __($g.'guide_notify_event2') }}</li>
+    <li>{{ __($g.'guide_notify_event3') }}</li>
+  </ul>
+  <p>{{ __($g.'guide_notify_setup') }}</p>
+</div>
 </div>
 
 <hr class="gd-hr">
 
-<div class="gd-sec" id="gde-faq">
-  <h3>💬 Häufig gestellte Fragen</h3>
+{{-- NAV LINKS --}}
+<div class="gd-sec" id="gen-navlinks">
+  <h3>🔗 {{ __($g.'guide_navlinks_title') }}</h3>
 <div class="gd-sec-body">
-  <p class="gd-faq-q">Mein Flug erscheint nicht im Tab „Unplausibel" – kann ich ihn trotzdem korrigieren?</p>
-  <p class="gd-faq-a">Der Tab zeigt nur Werte von 0 oder über -20 ft/min. Wenn dein Flug dort nicht auftaucht aber die Rate trotzdem falsch wirkt, gehe zu <strong>Meine Flüge</strong> und klicke dort auf <strong>Korrigieren →</strong>.</p>
-  <p class="gd-faq-q">Wie lange dauert die Prüfung?</p>
-  <p class="gd-faq-a">Das hängt von der Admin-Verfügbarkeit ab. Aktiviere die E-Mail-Benachrichtigung beim Einreichen damit du sofort informiert wirst.</p>
-
-  <p class="gd-faq-q">Mein Antrag wurde genehmigt aber der PIREP zeigt noch den alten Wert.</p>
-  <p class="gd-faq-a" style="margin-bottom:0">Browser-Cache leeren und Seite neu laden. Wenn das Problem bleibt, Admin kontaktieren.</p>
+  <p>{{ __($g.'guide_navlinks_intro') }}</p>
+  <table class="gd-tbl">
+    <thead><tr><th>{{ __($g.'guide_navlinks_tbl_who') }}</th><th>{{ __($g.'guide_navlinks_tbl_url') }}</th><th>{{ __($g.'guide_navlinks_tbl_desc') }}</th></tr></thead>
+    <tbody>
+      <tr><td>{{ __($g.'guide_navlinks_pilot') }}</td><td><span class="gd-code">{{ url('/lrc') }}</span></td><td>{{ __($g.'guide_navlinks_pilot_desc') }}</td></tr>
+      <tr><td>{{ __($g.'guide_navlinks_admin') }}</td><td><span class="gd-code">{{ url('/admin/lrc') }}</span></td><td>{{ __($g.'guide_navlinks_admin_desc') }}</td></tr>
+      <tr><td>{{ __($g.'guide_navlinks_admin') }}</td><td><span class="gd-code">{{ url('/admin/lrc/implausible') }}</span></td><td>{{ __($g.'guide_navlinks_admin_imp') }}</td></tr>
+    </tbody>
+  </table>
 </div>
 </div>
-
-{{-- ═══════════════ NUR ADMINS ═══════════════ --}}
-@if(auth()->user()->hasRole('admin'))
-
-<hr class="gd-hr">
-<div class="gd-admin-section">
-  <div class="gd-admin-header">🔒 Admin-Bereich – nur für Admins sichtbar</div>
-
-  <div class="gd-sec" id="gde-admintabs" style="margin-bottom:1.5rem">
-    <h3>🧭 Admin-Panel – Alle Tabs erklärt</h3>
-<div class="gd-sec-body">
-    <p>Das Admin-Panel erreichst du unter <a href="{{ url('/admin/lrc') }}" style="color:var(--ap-blue)">{{ url('/admin/lrc') }}</a></p>
-  <div class="gd-tip"><strong>Tipp:</strong> Das Admin-Panel ist auch über die linke Sidebar im phpVMS-Adminbereich erreichbar: <strong>Addons → LR Corrections</strong>.</div>
-    <table class="gd-tbl">
-      <thead><tr><th>Tab</th><th>Was du siehst</th><th>Wann benutzen</th></tr></thead>
-      <tbody>
-        <tr><td>⏳ <strong>Pending</strong></td><td>Offene Anträge die auf Entscheidung warten</td><td>Hauptarbeitswarteschlange – täglich prüfen</td></tr>
-        <tr><td>✓ <strong>Approved</strong></td><td>Alle genehmigten Korrekturen</td><td>Prüfen ob Korrekturen korrekt angewendet wurden</td></tr>
-        <tr><td>✗ <strong>Rejected</strong></td><td>Abgelehnte Anträge mit Admin-Notizen</td><td>Frühere Entscheidungen nachschlagen</td></tr>
-        <tr><td>≡ <strong>All Requests</strong></td><td>Komplette Historie aller Piloten</td><td>Vollständiges Audit</td></tr>
-        <tr><td>✦ <strong>Audit Log</strong></td><td>Chronologisches Protokoll – wer entschied was und wann</td><td>Nachvollziehbarkeit</td></tr>
-        <tr><td>✉ <strong>Recipients</strong></td><td>Auswahl welche Admins E-Mail-Benachrichtigungen erhalten</td><td>Ersteinrichtung / wenn Team sich ändert</td></tr>
-        <tr><td>⚠ <strong>Implausible PIREPs</strong></td><td>Alle site-weiten PIREPs mit verdächtigen Raten</td><td>Proaktive Bereinigung + Direktkorrektur</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-  <div class="gd-sec" id="gde-review" style="margin-bottom:1.5rem">
-    <h3>🔍 Wie prüfe ich einen Pilotenantrag?</h3>
-<div class="gd-sec-body">
-    <ol class="gd-steps">
-      <li><span class="gd-n">1</span><span>Gehe zu <strong>⏳ Pending</strong> und klicke auf <strong>Review →</strong>.</span></li>
-      <li><span class="gd-n">2</span><span>Flugdetails prüfen: originale Rate, beantragte Rate, Einreichungszeit.</span></li>
-      <li><span class="gd-n">3</span><span>Begründung des Piloten lesen und Nachweis prüfen falls vorhanden.</span></li>
-      <li><span class="gd-n">4</span><span><strong>Admin-Notiz</strong> eingeben – optional bei Genehmigung, <strong>Pflicht</strong> bei Ablehnung.</span></li>
-      <li><span class="gd-n">5</span><span><strong>Approve</strong> oder <strong>Reject</strong> klicken. PIREP wird bei Genehmigung sofort aktualisiert.</span></li>
-    </ol>
-    <div class="gd-warn"><strong>Hinweis:</strong> Entscheidungen können nicht über das Modul rückgängig gemacht werden.</div>
-</div>
-    <div class="gd-tip"><strong>Tipp:</strong> Gib immer einen klaren Ablehnungsgrund an – Piloten können beim nächsten Mal besser Nachweise liefern.</div>
-  </div>
-
-  <div class="gd-sec" id="gde-direct" style="margin-bottom:1.5rem">
-    <h3>⚡ Direktkorrektur – Ohne Pilotenantrag</h3>
-<div class="gd-sec-body">
-    <p>In <strong>⚠ Implausible PIREPs</strong> hat jede Zeile ein <strong>Direct Fix</strong>-Formular. Damit korrigierst du sofort, ohne auf einen Pilotenantrag zu warten.</p>
-    <div class="gd-warn"><strong>Mit Vorsicht:</strong> Kein Audit-Eintrag auf Pilotenseite. Nur bei eindeutigen Fehlern verwenden (z.B. ACARS 0 ft/min).</div>
-</div>
-  </div>
-
-  <div class="gd-sec" id="gde-notify" style="margin-bottom:1.5rem">
-    <h3>✉️ E-Mail-Benachrichtigungen einrichten</h3>
-<div class="gd-sec-body">
-    <p>Unter <strong>✉ Recipients</strong> im Admin-Panel auswählen welche Admins eine E-Mail erhalten wenn ein Pilot einen neuen Antrag einreicht.</p>
-    <div class="gd-warn"><strong>Wichtig:</strong> Wenn keine Empfänger konfiguriert sind werden gar keine E-Mails versendet. Mindestens einen Admin auswählen.</div>
-</div>
-    <div class="gd-tip"><strong>Tipp:</strong> Nur Benutzer mit der Rolle <em>admin</em> erscheinen in der Liste. Fehlende Admins → Config → Roles prüfen.</div>
-  </div>
-
-  <div class="gd-sec" id="gde-navlinks" style="margin-bottom:0">
-    <h3>🔗 Frontend-Navigation – Modul einbinden</h3>
-<div class="gd-sec-body">
-    <p>Damit Piloten das Modul finden, muss ein Link in der Theme-Navigation eingefügt werden:</p>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 1 – Einfacher Link in der Nav-Vorlage:</p>
-    <div class="gd-codeblock">&lt;a href="@{{ url('/lrc') }}"&gt;Landeratenkorrekturen&lt;/a&gt;</div>
-</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 2 – Mit benannter Route:</p>
-    <div class="gd-codeblock">&lt;a href="@{{ route('lrc.pilot.index') }}"&gt;Landeratenkorrekturen&lt;/a&gt;</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem">Option 3 – Direkt zu einem bestimmten Tab:</p>
-    <div class="gd-codeblock">&lt;!-- Öffnet den Tab "Unplausibel" --&gt;
-&lt;a href="@{{ url('/lrc#imp') }}"&gt;Unplausible Landungen&lt;/a&gt;
-
-&lt;!-- Öffnet den Tab "Meine Anträge" --&gt;
-&lt;a href="@{{ url('/lrc#audit') }}"&gt;Meine Anträge&lt;/a&gt;
-
-&lt;!-- Öffnet das Handbuch --&gt;
-&lt;a href="@{{ url('/lrc#guide') }}"&gt;LRC Handbuch&lt;/a&gt;</div>
-
-    <div class="gd-note"><strong>Wo einfügen:</strong> In phpVMS 7 mit Custom-Theme die Navigation-Vorlage suchen – z.B. <span class="gd-code">resources/views/layouts/nav.blade.php</span>. Den Link innerhalb des <span class="gd-code">@auth ... @endauth</span>-Blocks einfügen damit Gäste ihn nicht sehen.</div>
-
-    <p style="font-weight:700;font-size:.88rem;margin-bottom:.3rem;margin-top:1rem">Alle Modul-URLs:</p>
-    <table class="gd-tbl">
-      <thead><tr><th>Wer</th><th>URL</th><th>Beschreibung</th></tr></thead>
-      <tbody>
-        <tr><td>Pilot</td><td><span class="gd-code">{{ url('/lrc') }}</span></td><td>Pilot-Dashboard</td></tr>
-        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc') }}</span></td><td>Admin-Panel – alle Anträge verwalten</td></tr>
-        <tr><td>Admin</td><td><span class="gd-code">{{ url('/admin/lrc/implausible') }}</span></td><td>Alle unplausiblen PIREPs + Direktkorrektur</td></tr>
-      </tbody>
-    </table>
-  </div>
 
 </div>{{-- gd-admin-section --}}
 @endif {{-- isAdmin --}}
@@ -1358,7 +1115,6 @@ function lrcDet(id, btn) {
 </div>{{-- gd-body --}}
 </div>{{-- gd --}}
 
-@endif {{-- lang --}}
 
 <script>
 // Smooth scroll for guide anchor links
@@ -1371,19 +1127,17 @@ document.querySelectorAll('.gd-c[href^="#"]').forEach(function(a){
 });
 </script>
 
+</div>{{-- /.lrc-guide-box --}}
 </div>{{-- lrc-panel-guide --}}
 
+</div>{{-- /.lrc-wrap --}}
 
-
-{{-- ── LRC Footer ── --}}
-<center style="color:gray;font-size:12px;opacity:0.5;transition:opacity .2s;margin-top:2.5rem;padding-bottom:1rem;display:block"
-        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='0.5'">
-  <a href="https://github.com/MANFahrer-GF" target="_blank"
-     style="color:gray;text-decoration:none">Landing Rate Corrections</a>
+{{-- ── LRC Footer (always glass mode - OUTSIDE lrc-wrap) ── --}}
+<div class="lrc-footer">
+  <a href="https://github.com/MANFahrer-GF" target="_blank">Landing Rate Corrections</a>
   &mdash; crafted with
-  <span style="color:#e25555;animation:lrc-pulse 1.8s ease-in-out infinite">&#9829;</span>
+  <span class="lrc-footer-heart">&#9829;</span>
   in Germany by Thomas Kant
-</center>
-<style>@keyframes lrc-pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+</div>
 
 @endsection
