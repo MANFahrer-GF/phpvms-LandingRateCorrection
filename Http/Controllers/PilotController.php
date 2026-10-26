@@ -4,6 +4,7 @@ namespace Modules\LandingRateCorrection\Http\Controllers;
 
 use App\Models\Pirep;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -123,6 +124,19 @@ class PilotController extends Controller
         $pirep = Pirep::findOrFail($pirepId);
         if ((int) $pirep->user_id !== (int) Auth::id()) abort(403);
 
+        // Double submit: a second pending row would hit unique_pending_per_pirep (500)
+        if (LandingRateCorrection::where('pirep_id', $pirepId)->pending()->exists()) {
+            return redirect()->route('lrc.pilot.index')
+                ->with('warning', 'A pending request already exists for this PIREP.');
+        }
+
+        // Same rule as the index ($canReq): an approved PIREP cannot be re-requested,
+        // otherwise approving the new row would hit the unique index in AdminController
+        if (LandingRateCorrection::where('pirep_id', $pirepId)->where('status', 'approved')->exists()) {
+            return redirect()->route('lrc.pilot.index')
+                ->with('warning', 'This PIREP has already been corrected.');
+        }
+
         // Remove old rejected requests so pilot can re-apply
         LandingRateCorrection::where('pirep_id', $pirepId)
             ->where('status', 'rejected')
@@ -180,17 +194,23 @@ class PilotController extends Controller
             }
         }
 
-        $correction = LandingRateCorrection::create([
-            'pirep_id'               => $pirepId,
-            'pilot_id'               => Auth::id(),
-            'original_landing_rate'  => $pirep->landing_rate ?? 0,
-            'requested_landing_rate' => $validated['requested_landing_rate'],
-            'reason'                 => $validated['reason'],
-            'notify_on_decision'     => $request->has('notify_on_decision') ? 1 : 0,
-            'evidence_path'          => $evidencePath,
-            'evidence_original_name' => $evidenceOriginalName,
-            'status'                 => 'pending',
-        ]);
+        try {
+            $correction = LandingRateCorrection::create([
+                'pirep_id'               => $pirepId,
+                'pilot_id'               => Auth::id(),
+                'original_landing_rate'  => $pirep->landing_rate ?? 0,
+                'requested_landing_rate' => $validated['requested_landing_rate'],
+                'reason'                 => $validated['reason'],
+                'notify_on_decision'     => $request->has('notify_on_decision') ? 1 : 0,
+                'evidence_path'          => $evidencePath,
+                'evidence_original_name' => $evidenceOriginalName,
+                'status'                 => 'pending',
+            ]);
+        } catch (UniqueConstraintViolationException $e) {
+            // Two simultaneous submits both passed the check above
+            return redirect()->route('lrc.pilot.index')
+                ->with('warning', 'A pending request already exists for this PIREP.');
+        }
 
         // Send admin notifications – single call to avoid multiple SMTP connections
         try {

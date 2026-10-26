@@ -230,7 +230,8 @@ textarea.lrc-inp { resize:vertical;min-height:110px; }
     <div class="lrc-card-body">
         <form method="POST"
               action="{{ route('lrc.pilot.store', $pirep->id) }}"
-              enctype="multipart/form-data">
+              enctype="multipart/form-data"
+              onsubmit="this.querySelector('.btn-submit').disabled = true">
             @csrf
 
             {{-- Landing Rate --}}
@@ -318,6 +319,8 @@ textarea.lrc-inp { resize:vertical;min-height:110px; }
             </div>
 
         </form>
+        {{-- Re-enable the submit button when Safari restores the page via "Back" --}}
+        <script>window.addEventListener('pageshow', function () { document.querySelector('.btn-submit').disabled = false; });</script>
     </div>
 </div>
 

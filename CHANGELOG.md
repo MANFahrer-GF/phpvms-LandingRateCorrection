@@ -5,6 +5,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.2.4] — 2026-10-26
+
+### Fixed
+- **HTTP 500 on double submit** — submitting the correction form twice (e.g. a second tap on iPad while the admin e-mails were still being sent) inserted a second pending row and failed on the unique index `(pirep_id, status)`. `store()` now redirects to the overview with a notice if a pending request already exists; two truly simultaneous requests are caught as well.
+- **Submit button** is disabled after the first click and re-enabled when the browser restores the page via "Back".
+- **Approved PIREPs** can no longer be re-requested via a hand-typed URL (same rule as the overview already applied); approving such a request would have hit the same unique index.
+
+---
+
 ## [1.2.3] — 2025-03-10
 
 ### Added
