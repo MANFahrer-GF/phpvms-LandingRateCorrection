@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.2.5] — 2026-10-26
+
+### Changed
+- **Guide: evidence advice** (`guide_submit_tip`, `guide_faq_a2`) in all 9 languages — the best evidence is now the AeroACARS flight log or the flight on the live map. A screenshot of the cockpit VSI or a replay tool is no longer recommended: since AeroACARS 1.6.3 the instrument deliberately lags the real sink rate and is not proof. The form is meant for genuine failures (0 ft/min, connection lost before touchdown, missing recording). es, fr, it, ja, pt-br, pt-pt and tr now have real translations for both keys instead of the English fallback.
+
+---
+
 ## [1.2.4] — 2026-10-26
 
 ### Fixed

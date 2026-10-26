@@ -102,7 +102,7 @@ return [
     'guide_submit_step4' => 'Explain why the recorded value is wrong',
     'guide_submit_step5' => 'Optionally attach a screenshot as proof',
     'guide_submit_step6' => 'Submit and wait for admin review',
-    'guide_submit_tip'   => 'Screenshots from flight trackers or replay tools help admins review your request.',
+    'guide_submit_tip'   => 'Le plus utile est votre journal de vol AeroACARS ou l\'entrée sur la carte en direct. Une capture du variomètre du cockpit n\'est PAS une contre-preuve depuis AeroACARS 1.6.3 : l\'instrument est lent et s\'écarte volontairement.',
 
     // ═══════════════════════════════════════════════════════════
     // GUIDE - SECTION: REQUEST STATUS
@@ -122,7 +122,7 @@ return [
     'guide_faq_q1'    => 'Can I request a correction for any landing?',
     'guide_faq_a1'    => 'No. Only for obviously wrong values (0 ft/min, positive). Not for improving normal landings.',
     'guide_faq_q2'    => 'What proof do I need?',
-    'guide_faq_a2'    => 'Ideally a screenshot from your flight tracker or replay tool. If unavailable, explain clearly.',
+    'guide_faq_a2'    => 'Idéalement votre journal de vol AeroACARS ou le vol sur la carte en direct. Important : depuis AeroACARS 1.6.3, une capture du variomètre ou d\'un outil de replay affiche volontairement une autre valeur, car l\'instrument est en retard sur le taux de descente réel. Ce n\'est donc pas une preuve. Utilisez ce formulaire pour de vraies pannes : 0 ft/min, connexion perdue avant le toucher, enregistrement manquant. Décrivez alors clairement ce qui s\'est passé.',
     'guide_faq_q3'    => 'How long does review take?',
     'guide_faq_a3'    => 'Usually a few days. You\'ll be notified by email if enabled.',
     'guide_faq_q4'    => 'Can I resubmit after rejection?',

@@ -102,7 +102,7 @@ return [
     'guide_submit_step4' => 'Explain why the recorded value is wrong',
     'guide_submit_step5' => 'Optionally attach a screenshot as proof',
     'guide_submit_step6' => 'Submit and wait for admin review',
-    'guide_submit_tip'   => 'Screenshots from flight trackers or replay tools help admins review your request.',
+    'guide_submit_tip'   => 'Your AeroACARS flight log or the entry on the live map helps most. A screenshot of the cockpit VSI is NOT counter-evidence since AeroACARS 1.6.3 — the instrument lags and deviates by design.',
 
     // ═══════════════════════════════════════════════════════════
     // GUIDE - SECTION: REQUEST STATUS
@@ -122,7 +122,7 @@ return [
     'guide_faq_q1'    => 'Can I request a correction for any landing?',
     'guide_faq_a1'    => 'No. Only for obviously wrong values (0 ft/min, positive). Not for improving normal landings.',
     'guide_faq_q2'    => 'What proof do I need?',
-    'guide_faq_a2'    => 'Ideally a screenshot from your flight tracker or replay tool. If unavailable, explain clearly.',
+    'guide_faq_a2'    => 'Ideally your AeroACARS flight log or the flight on the live map. Important: a screenshot of the cockpit VSI or a replay tool has deliberately shown a different value since AeroACARS 1.6.3 — the instrument lags behind the real sink rate. It is not proof. Use this form for genuine failures: 0 ft/min, connection lost before touchdown, missing recording. Then describe clearly what happened.',
     'guide_faq_q3'    => 'How long does review take?',
     'guide_faq_a3'    => 'Usually a few days. You\'ll be notified by email if enabled.',
     'guide_faq_q4'    => 'Can I resubmit after rejection?',

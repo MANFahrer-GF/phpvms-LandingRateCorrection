@@ -102,7 +102,7 @@ return [
     'guide_submit_step4' => 'Erkläre warum der aufgezeichnete Wert falsch ist',
     'guide_submit_step5' => 'Optional einen Screenshot als Beweis anhängen',
     'guide_submit_step6' => 'Absenden und auf Admin-Prüfung warten',
-    'guide_submit_tip'   => 'Screenshots von Flight-Trackern oder Replay-Tools helfen Admins bei der Prüfung.',
+    'guide_submit_tip'   => 'Am besten hilft dein AeroACARS-Flugprotokoll oder der Eintrag auf der Live-Karte. Ein Screenshot des Cockpit-Variometers ist seit AeroACARS 1.6.3 KEIN Gegenbeweis — das Instrument ist träge und weicht bewusst ab.',
 
     // ═══════════════════════════════════════════════════════════
     // GUIDE - SECTION: REQUEST STATUS
@@ -122,7 +122,7 @@ return [
     'guide_faq_q1'    => 'Kann ich für jede Landung eine Korrektur beantragen?',
     'guide_faq_a1'    => 'Nein. Nur für offensichtlich falsche Werte (0 ft/min, positiv). Nicht zur Verbesserung normaler Landungen.',
     'guide_faq_q2'    => 'Welchen Nachweis brauche ich?',
-    'guide_faq_a2'    => 'Idealerweise einen Screenshot von deinem Flight-Tracker oder Replay-Tool. Falls nicht verfügbar, erkläre klar was passiert ist.',
+    'guide_faq_a2'    => 'Am besten dein AeroACARS-Flugprotokoll oder der Flug auf der Live-Karte. Wichtig: Ein Screenshot des Cockpit-Variometers oder eines Replay-Tools zeigt seit AeroACARS 1.6.3 bewusst einen anderen Wert — das Instrument hinkt der echten Sinkrate nach. Es ist also kein Nachweis. Nutze dieses Formular für echte Ausfälle: 0 ft/min, Verbindungsabbruch vor dem Aufsetzen, fehlende Aufzeichnung. Beschreibe dann klar, was passiert ist.',
     'guide_faq_q3'    => 'Wie lange dauert die Prüfung?',
     'guide_faq_a3'    => 'Normalerweise ein paar Tage. Du wirst per E-Mail benachrichtigt falls aktiviert.',
     'guide_faq_q4'    => 'Kann ich nach einer Ablehnung erneut einreichen?',

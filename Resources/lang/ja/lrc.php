@@ -102,7 +102,7 @@ return [
     'guide_submit_step4' => 'Explain why the recorded value is wrong',
     'guide_submit_step5' => 'Optionally attach a screenshot as proof',
     'guide_submit_step6' => 'Submit and wait for admin review',
-    'guide_submit_tip'   => 'Screenshots from flight trackers or replay tools help admins review your request.',
+    'guide_submit_tip'   => '最も有効なのは AeroACARS の飛行ログ、またはライブマップの記録です。コックピットの昇降計のスクリーンショットは AeroACARS 1.6.3 以降、反証にはなりません。計器には遅れがあり、意図的に異なる値を示します。',
 
     // ═══════════════════════════════════════════════════════════
     // GUIDE - SECTION: REQUEST STATUS
@@ -122,7 +122,7 @@ return [
     'guide_faq_q1'    => 'Can I request a correction for any landing?',
     'guide_faq_a1'    => 'No. Only for obviously wrong values (0 ft/min, positive). Not for improving normal landings.',
     'guide_faq_q2'    => 'What proof do I need?',
-    'guide_faq_a2'    => 'Ideally a screenshot from your flight tracker or replay tool. If unavailable, explain clearly.',
+    'guide_faq_a2'    => 'AeroACARS の飛行ログ、またはライブマップ上の飛行が最適です。重要: AeroACARS 1.6.3 以降、昇降計やリプレイツールのスクリーンショットは意図的に異なる値を示します。計器が実際の降下率に遅れて追随するためで、証拠にはなりません。このフォームは実際の障害用です: 0 ft/min、接地前の接続断、記録の欠落。その場合は何が起きたかを明確に記述してください。',
     'guide_faq_q3'    => 'How long does review take?',
     'guide_faq_a3'    => 'Usually a few days. You\'ll be notified by email if enabled.',
     'guide_faq_q4'    => 'Can I resubmit after rejection?',

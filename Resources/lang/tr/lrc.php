@@ -102,7 +102,7 @@ return [
     'guide_submit_step4' => 'Explain why the recorded value is wrong',
     'guide_submit_step5' => 'Optionally attach a screenshot as proof',
     'guide_submit_step6' => 'Submit and wait for admin review',
-    'guide_submit_tip'   => 'Screenshots from flight trackers or replay tools help admins review your request.',
+    'guide_submit_tip'   => 'En çok AeroACARS uçuş kaydınız veya canlı haritadaki kayıt yardımcı olur. Kokpit variyometresinin ekran görüntüsü AeroACARS 1.6.3\'ten beri karşı kanıt DEĞİLDİR: gösterge yavaştır ve bilerek sapar.',
 
     // ═══════════════════════════════════════════════════════════
     // GUIDE - SECTION: REQUEST STATUS
@@ -122,7 +122,7 @@ return [
     'guide_faq_q1'    => 'Can I request a correction for any landing?',
     'guide_faq_a1'    => 'No. Only for obviously wrong values (0 ft/min, positive). Not for improving normal landings.',
     'guide_faq_q2'    => 'What proof do I need?',
-    'guide_faq_a2'    => 'Ideally a screenshot from your flight tracker or replay tool. If unavailable, explain clearly.',
+    'guide_faq_a2'    => 'En iyisi AeroACARS uçuş kaydınız veya canlı haritadaki uçuştur. Önemli: AeroACARS 1.6.3\'ten beri variyometre veya tekrar aracı ekran görüntüsü bilerek farklı bir değer gösterir, çünkü gösterge gerçek alçalma hızının gerisinde kalır. Bu nedenle kanıt sayılmaz. Bu formu gerçek arızalar için kullanın: 0 ft/dk, temastan önce bağlantı kopması, kayıt eksikliği. Ardından ne olduğunu net biçimde açıklayın.',
     'guide_faq_q3'    => 'How long does review take?',
     'guide_faq_a3'    => 'Usually a few days. You\'ll be notified by email if enabled.',
     'guide_faq_q4'    => 'Can I resubmit after rejection?',
